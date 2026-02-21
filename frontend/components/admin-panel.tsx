@@ -1,14 +1,28 @@
 "use client";
 
 import { useState } from "react";
-import { AdminDashboard } from "@/components/admin-dashboard";
-import { PresetsManager } from "@/components/presets-manager";
+import { ContentUpload } from "@/components/content-upload";
+import { PresetsManager } from "@/components/server-cfg-presets-manager";
 import { WeatherPresetsManager } from "@/components/weather-presets-manager";
+import { InstalledCarsManager } from "@/components/installed-cars-manager";
+import { InstalledTracksManager } from "@/components/installed-tracks-manager";
 
 export const AdminPanel = () => {
-  const [activeTab, setActiveTab] = useState<"uploads" | "presets" | "weather">(
-    "uploads",
+  const [activeTab, setActiveTab] = useState<
+    "uploads" | "presets" | "weather" | "cars" | "tracks"
+  >("uploads");
+
+  // Track which tabs have been visited to enable lazy loading with caching
+  const [visitedTabs, setVisitedTabs] = useState<Set<string>>(
+    new Set(["uploads"]),
   );
+
+  const handleTabChange = (
+    tab: "uploads" | "presets" | "weather" | "cars" | "tracks",
+  ) => {
+    setActiveTab(tab);
+    setVisitedTabs((prev) => new Set(prev).add(tab));
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-8">
@@ -26,7 +40,7 @@ export const AdminPanel = () => {
         {/* Tab Navigation */}
         <div className="flex gap-4 mb-8 bg-white rounded-lg shadow-lg p-2 flex-wrap">
           <button
-            onClick={() => setActiveTab("uploads")}
+            onClick={() => handleTabChange("uploads")}
             className={`flex-1 min-w-max px-6 py-3 rounded-lg font-medium transition-all ${
               activeTab === "uploads"
                 ? "bg-indigo-600 text-white shadow"
@@ -36,7 +50,27 @@ export const AdminPanel = () => {
             📤 File Uploads
           </button>
           <button
-            onClick={() => setActiveTab("weather")}
+            onClick={() => handleTabChange("cars")}
+            className={`flex-1 min-w-max px-6 py-3 rounded-lg font-medium transition-all ${
+              activeTab === "cars"
+                ? "bg-indigo-600 text-white shadow"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            🏎️ Installed Cars
+          </button>
+          <button
+            onClick={() => handleTabChange("tracks")}
+            className={`flex-1 min-w-max px-6 py-3 rounded-lg font-medium transition-all ${
+              activeTab === "tracks"
+                ? "bg-indigo-600 text-white shadow"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            🏁 Installed Tracks
+          </button>
+          <button
+            onClick={() => handleTabChange("weather")}
             className={`flex-1 min-w-max px-6 py-3 rounded-lg font-medium transition-all ${
               activeTab === "weather"
                 ? "bg-indigo-600 text-white shadow"
@@ -46,7 +80,7 @@ export const AdminPanel = () => {
             🌤️ Weather
           </button>
           <button
-            onClick={() => setActiveTab("presets")}
+            onClick={() => handleTabChange("presets")}
             className={`flex-1 min-w-max px-6 py-3 rounded-lg font-medium transition-all ${
               activeTab === "presets"
                 ? "bg-indigo-600 text-white shadow"
@@ -59,9 +93,31 @@ export const AdminPanel = () => {
 
         {/* Tab Content */}
         <div className="bg-white rounded-lg shadow-lg p-8">
-          {activeTab === "uploads" && <AdminDashboard />}
-          {activeTab === "weather" && <WeatherPresetsManager />}
-          {activeTab === "presets" && <PresetsManager />}
+          {visitedTabs.has("uploads") && (
+            <div className={activeTab === "uploads" ? "" : "hidden"}>
+              <ContentUpload />
+            </div>
+          )}
+          {visitedTabs.has("cars") && (
+            <div className={activeTab === "cars" ? "" : "hidden"}>
+              <InstalledCarsManager />
+            </div>
+          )}
+          {visitedTabs.has("tracks") && (
+            <div className={activeTab === "tracks" ? "" : "hidden"}>
+              <InstalledTracksManager />
+            </div>
+          )}
+          {visitedTabs.has("weather") && (
+            <div className={activeTab === "weather" ? "" : "hidden"}>
+              <WeatherPresetsManager />
+            </div>
+          )}
+          {visitedTabs.has("presets") && (
+            <div className={activeTab === "presets" ? "" : "hidden"}>
+              <PresetsManager />
+            </div>
+          )}
         </div>
       </div>
     </div>

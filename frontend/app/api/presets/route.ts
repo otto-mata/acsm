@@ -1,7 +1,6 @@
+import fs from "fs";
 import { NextRequest, NextResponse } from "next/server";
 import path from "path";
-import fs from "fs";
-import { v4 as uuidv4 } from "crypto";
 
 const PRESETS_DIR = path.resolve(process.env.ROOT_PATH ?? "", "data/presets");
 

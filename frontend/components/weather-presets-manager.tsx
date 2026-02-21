@@ -383,7 +383,7 @@ export const WeatherPresetsManager = () => {
       )}
 
       {/* Presets Grid */}
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      <div className="p-8">
         <h3 className="text-xl font-semibold text-gray-800 mb-6">
           All Weather Presets ({presets.length})
         </h3>
@@ -419,20 +419,20 @@ export const WeatherPresetsManager = () => {
                 </div>
 
                 <div className="bg-gray-50 rounded p-3 mb-3 text-sm space-y-2">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-gray-600">
                     <span className="text-gray-600">Graphics:</span>
                     <span className="font-medium">
                       {getGraphicsDisplay(preset.graphics)}
                     </span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Ambient Temp:</span>
+                  <div className="flex justify-between text-gray-600">
+                    <span className="">Ambient Temp:</span>
                     <span className="font-medium">
                       {preset.baseTemperatureAmbient}°C (±
                       {preset.variationAmbient}°C)
                     </span>
                   </div>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between text-gray-600">
                     <span className="text-gray-600">Road Temp:</span>
                     <span className="font-medium">
                       {preset.baseTemperatureRoad}°C (±

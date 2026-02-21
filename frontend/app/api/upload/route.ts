@@ -97,3 +97,91 @@ export const DELETE = async (req: NextRequest) => {
     );
   }
 };
+
+export const PATCH = async (req: NextRequest) => {
+  try {
+    const { filename, currentType, newType } = await req.json();
+
+    if (!filename || !currentType || !newType) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "Filename, currentType, and newType required",
+        },
+        { status: 400 },
+      );
+    }
+
+    if (currentType === newType) {
+      return NextResponse.json(
+        { success: false, error: "File is already in this category" },
+        { status: 400 },
+      );
+    }
+
+    if (
+      !["car", "track"].includes(newType) ||
+      !["car", "track"].includes(currentType)
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Invalid type. Must be 'car' or 'track'" },
+        { status: 400 },
+      );
+    }
+
+    const SOURCE_DIR = path.resolve(BASE_UPLOAD_DIR, currentType);
+    const TARGET_DIR = path.resolve(BASE_UPLOAD_DIR, newType);
+    const sourcePath = path.resolve(SOURCE_DIR, filename);
+    const targetPath = path.resolve(TARGET_DIR, filename);
+
+    // Security checks
+    if (
+      !sourcePath.startsWith(SOURCE_DIR) ||
+      !targetPath.startsWith(TARGET_DIR)
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Invalid file path" },
+        { status: 400 },
+      );
+    }
+
+    if (!fs.existsSync(sourcePath)) {
+      return NextResponse.json(
+        { success: false, error: "File not found" },
+        { status: 404 },
+      );
+    }
+
+    // Create target directory if it doesn't exist
+    if (!fs.existsSync(TARGET_DIR)) {
+      fs.mkdirSync(TARGET_DIR, { recursive: true });
+    }
+
+    // Check if file already exists in target
+    if (fs.existsSync(targetPath)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "File with same name already exists in target category",
+        },
+        { status: 400 },
+      );
+    }
+
+    // Move the file
+    fs.renameSync(sourcePath, targetPath);
+
+    return NextResponse.json({
+      success: true,
+      message: `File moved from ${currentType} to ${newType} successfully`,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : "Move failed",
+      },
+      { status: 500 },
+    );
+  }
+};

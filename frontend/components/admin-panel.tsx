@@ -6,10 +6,11 @@ import { PresetsManager } from "@/components/server-cfg-presets-manager";
 import { WeatherPresetsManager } from "@/components/weather-presets-manager";
 import { InstalledCarsManager } from "@/components/installed-cars-manager";
 import { InstalledTracksManager } from "@/components/installed-tracks-manager";
+import { DeployPresetManager } from "@/components/deploy-preset-manager";
 
 export const AdminPanel = () => {
   const [activeTab, setActiveTab] = useState<
-    "uploads" | "presets" | "weather" | "cars" | "tracks"
+    "uploads" | "presets" | "weather" | "cars" | "tracks" | "deploy"
   >("uploads");
 
   // Track which tabs have been visited to enable lazy loading with caching
@@ -18,7 +19,7 @@ export const AdminPanel = () => {
   );
 
   const handleTabChange = (
-    tab: "uploads" | "presets" | "weather" | "cars" | "tracks",
+    tab: "uploads" | "presets" | "weather" | "cars" | "tracks" | "deploy",
   ) => {
     setActiveTab(tab);
     setVisitedTabs((prev) => new Set(prev).add(tab));
@@ -89,6 +90,16 @@ export const AdminPanel = () => {
           >
             ⚙️ Server Presets
           </button>
+          <button
+            onClick={() => handleTabChange("deploy")}
+            className={`flex-1 min-w-max px-6 py-3 rounded-lg font-medium transition-all ${
+              activeTab === "deploy"
+                ? "bg-indigo-600 text-white shadow"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            🚀 Deploy Preset
+          </button>
         </div>
 
         {/* Tab Content */}
@@ -116,6 +127,11 @@ export const AdminPanel = () => {
           {visitedTabs.has("presets") && (
             <div className={activeTab === "presets" ? "" : "hidden"}>
               <PresetsManager />
+            </div>
+          )}
+          {visitedTabs.has("deploy") && (
+            <div className={activeTab === "deploy" ? "" : "hidden"}>
+              <DeployPresetManager />
             </div>
           )}
         </div>

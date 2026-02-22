@@ -2,54 +2,60 @@
 
 import { useState, useEffect } from "react";
 
+interface Car {
+  name: string;
+  skin: string;
+  hasRandomSkin: boolean;
+}
+
 interface Preset {
   id: string;
   name: string;
   description?: string;
   weatherPresets?: string[];
   config: {
-    NAME: string;
-    CARS: string[];
-    CONFIG_TRACK: string;
-    TRACK: string;
-    SUN_ANGLE?: number;
-    PASSWORD?: string;
-    ADMIN_PASSWORD?: string;
-    UDP_PORT?: number;
-    TCP_PORT?: number;
-    HTTP_PORT?: number;
-    MAX_BALLAST_KG?: number;
-    QUALIFY_MAX_WAIT_PERC?: number;
-    PICKUP_MODE_ENABLED?: number;
-    LOOP_MODE?: number;
-    SLEEP_TIME?: number;
-    CLIENT_SEND_INTERVAL_HZ?: number;
-    SEND_BUFFER_SIZE?: number;
-    RECV_BUFFER_SIZE?: number;
-    RACE_OVER_TIME?: number;
-    KICK_QUORUM?: number;
-    VOTING_QUORUM?: number;
-    VOTE_DURATION?: number;
-    BLACKLIST_MODE?: number;
-    FUEL_RATE?: number;
-    DAMAGE_MULTIPLIER?: number;
-    TYRE_WEAR_RATE?: number;
-    ALLOWED_TYRES_OUT?: number;
-    ABS_ALLOWED?: number;
-    TC_ALLOWED?: number;
-    START_RULE?: number;
-    STABILITY_ALLOWED?: number;
-    AUTOCLUTCH_ALLOWED?: number;
-    TYRE_BLANKETS_ALLOWED?: number;
-    FORCE_VIRTUAL_MIRROR?: number;
-    REGISTER_TO_LOBBY?: number;
-    MAX_CLIENTS?: number;
-    NUM_THREADS?: number;
-    UDP_PLUGIN_LOCAL_PORT?: number;
-    UDP_PLUGIN_ADDRESS?: string;
-    AUTH_PLUGIN_ADDRESS?: string;
-    LEGAL_TYRES?: string[];
-    WELCOME_MESSAGE?: string;
+    name: string;
+    cars: string[];
+    config_track: string;
+    track: string;
+    sun_angle?: number;
+    password?: string;
+    admin_password?: string;
+    udp_port?: number;
+    tcp_port?: number;
+    http_port?: number;
+    max_ballast_kg?: number;
+    qualify_max_wait_perc?: number;
+    pickup_mode_enabled?: number;
+    loop_mode?: number;
+    sleep_time?: number;
+    client_send_interval_hz?: number;
+    send_buffer_size?: number;
+    recv_buffer_size?: number;
+    race_over_time?: number;
+    kick_quorum?: number;
+    voting_quorum?: number;
+    vote_duration?: number;
+    blacklist_mode?: number;
+    fuel_rate?: number;
+    damage_multiplier?: number;
+    tyre_wear_rate?: number;
+    allowed_tyres_out?: number;
+    abs_allowed?: number;
+    tc_allowed?: number;
+    start_rule?: number;
+    stability_allowed?: number;
+    autoclutch_allowed?: number;
+    tyre_blankets_allowed?: number;
+    force_virtual_mirror?: number;
+    register_to_lobby?: number;
+    max_clients?: number;
+    num_threads?: number;
+    udp_plugin_local_port?: number;
+    udp_plugin_address?: string;
+    auth_plugin_address?: string;
+    legal_tyres?: string[];
+    welcome_message?: string;
   };
   createdAt: string;
   updatedAt: string;
@@ -124,48 +130,48 @@ export const PresetsManager = () => {
     description: "",
     weatherPresets: [] as string[],
     config: {
-      NAME: "AC_Server",
-      CARS: [] as string[],
-      CONFIG_TRACK: "",
-      TRACK: "magione",
-      SUN_ANGLE: 48,
-      PASSWORD: "",
-      ADMIN_PASSWORD: "",
-      UDP_PORT: 9600,
-      TCP_PORT: 9600,
-      HTTP_PORT: 8081,
-      MAX_BALLAST_KG: 0,
-      QUALIFY_MAX_WAIT_PERC: 120,
-      PICKUP_MODE_ENABLED: 1,
-      LOOP_MODE: 1,
-      SLEEP_TIME: 1,
-      CLIENT_SEND_INTERVAL_HZ: 18,
-      SEND_BUFFER_SIZE: 0,
-      RECV_BUFFER_SIZE: 0,
-      RACE_OVER_TIME: 180,
-      KICK_QUORUM: 85,
-      VOTING_QUORUM: 80,
-      VOTE_DURATION: 20,
-      BLACKLIST_MODE: 1,
-      FUEL_RATE: 100,
-      DAMAGE_MULTIPLIER: 100,
-      TYRE_WEAR_RATE: 100,
-      ALLOWED_TYRES_OUT: 2,
-      ABS_ALLOWED: 0,
-      TC_ALLOWED: 0,
-      START_RULE: 0,
-      STABILITY_ALLOWED: 0,
-      AUTOCLUTCH_ALLOWED: 0,
-      TYRE_BLANKETS_ALLOWED: 0,
-      FORCE_VIRTUAL_MIRROR: 1,
-      REGISTER_TO_LOBBY: 1,
-      MAX_CLIENTS: 18,
-      NUM_THREADS: 2,
-      UDP_PLUGIN_LOCAL_PORT: 0,
-      UDP_PLUGIN_ADDRESS: "",
-      AUTH_PLUGIN_ADDRESS: "",
-      LEGAL_TYRES: [] as string[],
-      WELCOME_MESSAGE: "",
+      name: "AC_Server",
+      cars: [] as string[],
+      config_track: "",
+      track: "magione",
+      sun_angle: 48,
+      password: "",
+      admin_password: "",
+      udp_port: 9600,
+      tcp_port: 9600,
+      http_port: 8081,
+      max_ballast_kg: 0,
+      qualify_max_wait_perc: 120,
+      pickup_mode_enabled: 1,
+      loop_mode: 1,
+      sleep_time: 1,
+      client_send_interval_hz: 18,
+      send_buffer_size: 0,
+      recv_buffer_size: 0,
+      race_over_time: 180,
+      kick_quorum: 85,
+      voting_quorum: 80,
+      vote_duration: 20,
+      blacklist_mode: 1,
+      fuel_rate: 100,
+      damage_multiplier: 100,
+      tyre_wear_rate: 100,
+      allowed_tyres_out: 2,
+      abs_allowed: 0,
+      tc_allowed: 0,
+      start_rule: 0,
+      stability_allowed: 0,
+      autoclutch_allowed: 0,
+      tyre_blankets_allowed: 0,
+      force_virtual_mirror: 1,
+      register_to_lobby: 1,
+      max_clients: 18,
+      num_threads: 2,
+      udp_plugin_local_port: 0,
+      udp_plugin_address: "",
+      auth_plugin_address: "",
+      legal_tyres: [] as string[],
+      welcome_message: "",
     },
   });
   const [message, setMessage] = useState<{
@@ -380,48 +386,48 @@ export const PresetsManager = () => {
           description: "",
           weatherPresets: [],
           config: {
-            NAME: "",
-            CARS: [],
-            CONFIG_TRACK: "",
-            TRACK: "",
-            SUN_ANGLE: 48,
-            PASSWORD: "",
-            ADMIN_PASSWORD: "",
-            UDP_PORT: 9600,
-            TCP_PORT: 9600,
-            HTTP_PORT: 8081,
-            MAX_BALLAST_KG: 0,
-            QUALIFY_MAX_WAIT_PERC: 120,
-            PICKUP_MODE_ENABLED: 1,
-            LOOP_MODE: 1,
-            SLEEP_TIME: 1,
-            CLIENT_SEND_INTERVAL_HZ: 18,
-            SEND_BUFFER_SIZE: 0,
-            RECV_BUFFER_SIZE: 0,
-            RACE_OVER_TIME: 180,
-            KICK_QUORUM: 85,
-            VOTING_QUORUM: 80,
-            VOTE_DURATION: 20,
-            BLACKLIST_MODE: 1,
-            FUEL_RATE: 100,
-            DAMAGE_MULTIPLIER: 100,
-            TYRE_WEAR_RATE: 100,
-            ALLOWED_TYRES_OUT: 2,
-            ABS_ALLOWED: 0,
-            TC_ALLOWED: 0,
-            START_RULE: 0,
-            STABILITY_ALLOWED: 0,
-            AUTOCLUTCH_ALLOWED: 0,
-            TYRE_BLANKETS_ALLOWED: 0,
-            FORCE_VIRTUAL_MIRROR: 1,
-            REGISTER_TO_LOBBY: 1,
-            MAX_CLIENTS: 18,
-            NUM_THREADS: 2,
-            UDP_PLUGIN_LOCAL_PORT: 0,
-            UDP_PLUGIN_ADDRESS: "",
-            AUTH_PLUGIN_ADDRESS: "",
-            LEGAL_TYRES: [],
-            WELCOME_MESSAGE: "",
+            name: "",
+            cars: [],
+            config_track: "",
+            track: "",
+            sun_angle: 48,
+            password: "",
+            admin_password: "",
+            udp_port: 9600,
+            tcp_port: 9600,
+            http_port: 8081,
+            max_ballast_kg: 0,
+            qualify_max_wait_perc: 120,
+            pickup_mode_enabled: 1,
+            loop_mode: 1,
+            sleep_time: 1,
+            client_send_interval_hz: 18,
+            send_buffer_size: 0,
+            recv_buffer_size: 0,
+            race_over_time: 180,
+            kick_quorum: 85,
+            voting_quorum: 80,
+            vote_duration: 20,
+            blacklist_mode: 1,
+            fuel_rate: 100,
+            damage_multiplier: 100,
+            tyre_wear_rate: 100,
+            allowed_tyres_out: 2,
+            abs_allowed: 0,
+            tc_allowed: 0,
+            start_rule: 0,
+            stability_allowed: 0,
+            autoclutch_allowed: 0,
+            tyre_blankets_allowed: 0,
+            force_virtual_mirror: 1,
+            register_to_lobby: 1,
+            max_clients: 18,
+            num_threads: 2,
+            udp_plugin_local_port: 0,
+            udp_plugin_address: "",
+            auth_plugin_address: "",
+            legal_tyres: [],
+            welcome_message: "",
           },
         });
         fetchPresets();
@@ -442,48 +448,48 @@ export const PresetsManager = () => {
       name: preset.name,
       description: preset.description || "",
       config: {
-        NAME: preset.config.NAME || "",
-        CARS: preset.config.CARS || [],
-        CONFIG_TRACK: preset.config.CONFIG_TRACK || "",
-        TRACK: preset.config.TRACK || "",
-        SUN_ANGLE: preset.config.SUN_ANGLE ?? 48,
-        PASSWORD: preset.config.PASSWORD || "",
-        ADMIN_PASSWORD: preset.config.ADMIN_PASSWORD || "",
-        UDP_PORT: preset.config.UDP_PORT ?? 9600,
-        TCP_PORT: preset.config.TCP_PORT ?? 9600,
-        HTTP_PORT: preset.config.HTTP_PORT ?? 8081,
-        MAX_BALLAST_KG: preset.config.MAX_BALLAST_KG ?? 0,
-        QUALIFY_MAX_WAIT_PERC: preset.config.QUALIFY_MAX_WAIT_PERC ?? 120,
-        PICKUP_MODE_ENABLED: preset.config.PICKUP_MODE_ENABLED ?? 1,
-        LOOP_MODE: preset.config.LOOP_MODE ?? 1,
-        SLEEP_TIME: preset.config.SLEEP_TIME ?? 1,
-        CLIENT_SEND_INTERVAL_HZ: preset.config.CLIENT_SEND_INTERVAL_HZ ?? 18,
-        SEND_BUFFER_SIZE: preset.config.SEND_BUFFER_SIZE ?? 0,
-        RECV_BUFFER_SIZE: preset.config.RECV_BUFFER_SIZE ?? 0,
-        RACE_OVER_TIME: preset.config.RACE_OVER_TIME ?? 180,
-        KICK_QUORUM: preset.config.KICK_QUORUM ?? 85,
-        VOTING_QUORUM: preset.config.VOTING_QUORUM ?? 80,
-        VOTE_DURATION: preset.config.VOTE_DURATION ?? 20,
-        BLACKLIST_MODE: preset.config.BLACKLIST_MODE ?? 1,
-        FUEL_RATE: preset.config.FUEL_RATE ?? 100,
-        DAMAGE_MULTIPLIER: preset.config.DAMAGE_MULTIPLIER ?? 100,
-        TYRE_WEAR_RATE: preset.config.TYRE_WEAR_RATE ?? 100,
-        ALLOWED_TYRES_OUT: preset.config.ALLOWED_TYRES_OUT ?? 2,
-        ABS_ALLOWED: preset.config.ABS_ALLOWED ?? 0,
-        TC_ALLOWED: preset.config.TC_ALLOWED ?? 0,
-        START_RULE: preset.config.START_RULE ?? 0,
-        STABILITY_ALLOWED: preset.config.STABILITY_ALLOWED ?? 0,
-        AUTOCLUTCH_ALLOWED: preset.config.AUTOCLUTCH_ALLOWED ?? 0,
-        TYRE_BLANKETS_ALLOWED: preset.config.TYRE_BLANKETS_ALLOWED ?? 0,
-        FORCE_VIRTUAL_MIRROR: preset.config.FORCE_VIRTUAL_MIRROR ?? 1,
-        REGISTER_TO_LOBBY: preset.config.REGISTER_TO_LOBBY ?? 1,
-        MAX_CLIENTS: preset.config.MAX_CLIENTS ?? 18,
-        NUM_THREADS: preset.config.NUM_THREADS ?? 2,
-        UDP_PLUGIN_LOCAL_PORT: preset.config.UDP_PLUGIN_LOCAL_PORT ?? 0,
-        UDP_PLUGIN_ADDRESS: preset.config.UDP_PLUGIN_ADDRESS || "",
-        AUTH_PLUGIN_ADDRESS: preset.config.AUTH_PLUGIN_ADDRESS || "",
-        LEGAL_TYRES: preset.config.LEGAL_TYRES || [],
-        WELCOME_MESSAGE: preset.config.WELCOME_MESSAGE || "",
+        name: preset.config.name || "",
+        cars: preset.config.cars || [],
+        config_track: preset.config.config_track || "",
+        track: preset.config.track || "",
+        sun_angle: preset.config.sun_angle ?? 48,
+        password: preset.config.password || "",
+        admin_password: preset.config.admin_password || "",
+        udp_port: preset.config.udp_port ?? 9600,
+        tcp_port: preset.config.tcp_port ?? 9600,
+        http_port: preset.config.http_port ?? 8081,
+        max_ballast_kg: preset.config.max_ballast_kg ?? 0,
+        qualify_max_wait_perc: preset.config.qualify_max_wait_perc ?? 120,
+        pickup_mode_enabled: preset.config.pickup_mode_enabled ?? 1,
+        loop_mode: preset.config.loop_mode ?? 1,
+        sleep_time: preset.config.sleep_time ?? 1,
+        client_send_interval_hz: preset.config.client_send_interval_hz ?? 18,
+        send_buffer_size: preset.config.send_buffer_size ?? 0,
+        recv_buffer_size: preset.config.recv_buffer_size ?? 0,
+        race_over_time: preset.config.race_over_time ?? 180,
+        kick_quorum: preset.config.kick_quorum ?? 85,
+        voting_quorum: preset.config.voting_quorum ?? 80,
+        vote_duration: preset.config.vote_duration ?? 20,
+        blacklist_mode: preset.config.blacklist_mode ?? 1,
+        fuel_rate: preset.config.fuel_rate ?? 100,
+        damage_multiplier: preset.config.damage_multiplier ?? 100,
+        tyre_wear_rate: preset.config.tyre_wear_rate ?? 100,
+        allowed_tyres_out: preset.config.allowed_tyres_out ?? 2,
+        abs_allowed: preset.config.abs_allowed ?? 0,
+        tc_allowed: preset.config.tc_allowed ?? 0,
+        start_rule: preset.config.start_rule ?? 0,
+        stability_allowed: preset.config.stability_allowed ?? 0,
+        autoclutch_allowed: preset.config.autoclutch_allowed ?? 0,
+        tyre_blankets_allowed: preset.config.tyre_blankets_allowed ?? 0,
+        force_virtual_mirror: preset.config.force_virtual_mirror ?? 1,
+        register_to_lobby: preset.config.register_to_lobby ?? 1,
+        max_clients: preset.config.max_clients ?? 18,
+        num_threads: preset.config.num_threads ?? 2,
+        udp_plugin_local_port: preset.config.udp_plugin_local_port ?? 0,
+        udp_plugin_address: preset.config.udp_plugin_address || "",
+        auth_plugin_address: preset.config.auth_plugin_address || "",
+        legal_tyres: preset.config.legal_tyres || [],
+        welcome_message: preset.config.welcome_message || "",
       },
       weatherPresets: preset.weatherPresets || [],
     });
@@ -492,7 +498,7 @@ export const PresetsManager = () => {
     const carEntriesMap = new Map<string, CarEntry>();
     const skinsToFetch = new Set<number>();
 
-    for (const carString of preset.config.CARS || []) {
+    for (const carString of preset.config.cars || []) {
       const [carSlug, skinSlug] = carString.split("/");
       const car = availableCars.find((c) => c.slug === carSlug);
       if (!car) continue;
@@ -538,8 +544,8 @@ export const PresetsManager = () => {
     setCarEntries(entries);
 
     // Handle track selection
-    if (preset.config.TRACK) {
-      const track = availableTracks.find((t) => t.slug === preset.config.TRACK);
+    if (preset.config.track) {
+      const track = availableTracks.find((t) => t.slug === preset.config.track);
       if (track) {
         setSelectedTrackId(track.id);
         // Fetch layouts for this track
@@ -586,48 +592,48 @@ export const PresetsManager = () => {
       description: "",
       weatherPresets: [],
       config: {
-        NAME: "",
-        CARS: [],
-        CONFIG_TRACK: "",
-        TRACK: "",
-        SUN_ANGLE: 48,
-        PASSWORD: "",
-        ADMIN_PASSWORD: "",
-        UDP_PORT: 9600,
-        TCP_PORT: 9600,
-        HTTP_PORT: 8081,
-        MAX_BALLAST_KG: 0,
-        QUALIFY_MAX_WAIT_PERC: 120,
-        PICKUP_MODE_ENABLED: 1,
-        LOOP_MODE: 1,
-        SLEEP_TIME: 1,
-        CLIENT_SEND_INTERVAL_HZ: 18,
-        SEND_BUFFER_SIZE: 0,
-        RECV_BUFFER_SIZE: 0,
-        RACE_OVER_TIME: 180,
-        KICK_QUORUM: 85,
-        VOTING_QUORUM: 80,
-        VOTE_DURATION: 20,
-        BLACKLIST_MODE: 1,
-        FUEL_RATE: 100,
-        DAMAGE_MULTIPLIER: 100,
-        TYRE_WEAR_RATE: 100,
-        ALLOWED_TYRES_OUT: 2,
-        ABS_ALLOWED: 0,
-        TC_ALLOWED: 0,
-        START_RULE: 0,
-        STABILITY_ALLOWED: 0,
-        AUTOCLUTCH_ALLOWED: 0,
-        TYRE_BLANKETS_ALLOWED: 0,
-        FORCE_VIRTUAL_MIRROR: 1,
-        REGISTER_TO_LOBBY: 1,
-        MAX_CLIENTS: 18,
-        NUM_THREADS: 2,
-        UDP_PLUGIN_LOCAL_PORT: 0,
-        UDP_PLUGIN_ADDRESS: "",
-        AUTH_PLUGIN_ADDRESS: "",
-        LEGAL_TYRES: [],
-        WELCOME_MESSAGE: "",
+        name: "",
+        cars: [],
+        config_track: "",
+        track: "",
+        sun_angle: 48,
+        password: "",
+        admin_password: "",
+        udp_port: 9600,
+        tcp_port: 9600,
+        http_port: 8081,
+        max_ballast_kg: 0,
+        qualify_max_wait_perc: 120,
+        pickup_mode_enabled: 1,
+        loop_mode: 1,
+        sleep_time: 1,
+        client_send_interval_hz: 18,
+        send_buffer_size: 0,
+        recv_buffer_size: 0,
+        race_over_time: 180,
+        kick_quorum: 85,
+        voting_quorum: 80,
+        vote_duration: 20,
+        blacklist_mode: 1,
+        fuel_rate: 100,
+        damage_multiplier: 100,
+        tyre_wear_rate: 100,
+        allowed_tyres_out: 2,
+        abs_allowed: 1,
+        tc_allowed: 1,
+        start_rule: 0,
+        stability_allowed: 0,
+        autoclutch_allowed: 0,
+        tyre_blankets_allowed: 0,
+        force_virtual_mirror: 1,
+        register_to_lobby: 1,
+        max_clients: 18,
+        num_threads: 2,
+        udp_plugin_local_port: 0,
+        udp_plugin_address: "",
+        auth_plugin_address: "",
+        legal_tyres: [],
+        welcome_message: "",
       },
     });
   };
@@ -822,7 +828,9 @@ export const PresetsManager = () => {
                             {entry.carName}
                           </p>
                           {entry.skinId === "random" ? (
-                            <p className="text-xs text-gray-600">Random Skin</p>
+                            <p className="text-xs text-gray-600 flex items-center gap-1">
+                              🎲 Random Skin
+                            </p>
                           ) : (
                             <p className="text-xs text-gray-600">
                               {entry.skinName}
@@ -949,11 +957,11 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="text"
-                    value={formData.config.NAME || ""}
+                    value={formData.config.name || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
-                        config: { ...formData.config, NAME: e.target.value },
+                        config: { ...formData.config, name: e.target.value },
                       })
                     }
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500"
@@ -983,8 +991,8 @@ export const PresetsManager = () => {
                             ...formData,
                             config: {
                               ...formData.config,
-                              TRACK: track.slug,
-                              CONFIG_TRACK: "",
+                              track: track.slug,
+                              config_track: "",
                             },
                           });
                           // Fetch layouts for this track
@@ -995,8 +1003,8 @@ export const PresetsManager = () => {
                           ...formData,
                           config: {
                             ...formData.config,
-                            TRACK: "",
-                            CONFIG_TRACK: "",
+                            track: "",
+                            config_track: "",
                           },
                         });
                       }
@@ -1021,13 +1029,13 @@ export const PresetsManager = () => {
                     </label>
                     {trackLayouts.has(selectedTrackId) ? (
                       <select
-                        value={formData.config.CONFIG_TRACK || ""}
+                        value={formData.config.config_track || ""}
                         onChange={(e) =>
                           setFormData({
                             ...formData,
                             config: {
                               ...formData.config,
-                              CONFIG_TRACK: e.target.value,
+                              config_track: e.target.value,
                             },
                           })
                         }
@@ -1060,13 +1068,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.SUN_ANGLE || 48}
+                    value={formData.config.sun_angle || 48}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          SUN_ANGLE: parseInt(e.target.value),
+                          sun_angle: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1081,13 +1089,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.UDP_PORT || 9600}
+                    value={formData.config.udp_port || 9600}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          UDP_PORT: parseInt(e.target.value),
+                          udp_port: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1102,13 +1110,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.TCP_PORT || 9600}
+                    value={formData.config.tcp_port || 9600}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          TCP_PORT: parseInt(e.target.value),
+                          tcp_port: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1123,13 +1131,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.HTTP_PORT || 8081}
+                    value={formData.config.http_port || 8081}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          HTTP_PORT: parseInt(e.target.value),
+                          http_port: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1144,13 +1152,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.MAX_CLIENTS || 18}
+                    value={formData.config.max_clients || 18}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          MAX_CLIENTS: parseInt(e.target.value),
+                          max_clients: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1165,13 +1173,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="password"
-                    value={formData.config.PASSWORD || ""}
+                    value={formData.config.password || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          PASSWORD: e.target.value,
+                          password: e.target.value,
                         },
                       })
                     }
@@ -1186,13 +1194,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="password"
-                    value={formData.config.ADMIN_PASSWORD || ""}
+                    value={formData.config.admin_password || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          ADMIN_PASSWORD: e.target.value,
+                          admin_password: e.target.value,
                         },
                       })
                     }
@@ -1207,13 +1215,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.RACE_OVER_TIME || 180}
+                    value={formData.config.race_over_time || 180}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          RACE_OVER_TIME: parseInt(e.target.value),
+                          race_over_time: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1228,13 +1236,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.FUEL_RATE || 100}
+                    value={formData.config.fuel_rate || 100}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          FUEL_RATE: parseInt(e.target.value),
+                          fuel_rate: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1249,13 +1257,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.DAMAGE_MULTIPLIER || 100}
+                    value={formData.config.damage_multiplier || 100}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          DAMAGE_MULTIPLIER: parseInt(e.target.value),
+                          damage_multiplier: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1270,13 +1278,13 @@ export const PresetsManager = () => {
                   </label>
                   <input
                     type="number"
-                    value={formData.config.TYRE_WEAR_RATE || 100}
+                    value={formData.config.tyre_wear_rate || 100}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          TYRE_WEAR_RATE: parseInt(e.target.value),
+                          tyre_wear_rate: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1290,13 +1298,13 @@ export const PresetsManager = () => {
                     ABS Allowed
                   </label>
                   <select
-                    value={formData.config.ABS_ALLOWED || 0}
+                    value={formData.config.abs_allowed || 0}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          ABS_ALLOWED: parseInt(e.target.value),
+                          abs_allowed: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1314,13 +1322,13 @@ export const PresetsManager = () => {
                     TC Allowed
                   </label>
                   <select
-                    value={formData.config.TC_ALLOWED || 0}
+                    value={formData.config.tc_allowed || 0}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          TC_ALLOWED: parseInt(e.target.value),
+                          tc_allowed: parseInt(e.target.value),
                         },
                       })
                     }
@@ -1338,13 +1346,13 @@ export const PresetsManager = () => {
                     Welcome Message
                   </label>
                   <textarea
-                    value={formData.config.WELCOME_MESSAGE || ""}
+                    value={formData.config.welcome_message || ""}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         config: {
                           ...formData.config,
-                          WELCOME_MESSAGE: e.target.value,
+                          welcome_message: e.target.value,
                         },
                       })
                     }
@@ -1427,129 +1435,129 @@ export const PresetsManager = () => {
 
                 <div className="mt-4 p-4 bg-gray-50 rounded text-sm">
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {preset.config.NAME && (
+                    {preset.config.name && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           Server Name
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.NAME}
+                          {preset.config.name}
                         </p>
                       </div>
                     )}
-                    {preset.config.TRACK && (
+                    {preset.config.track && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           Track
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.TRACK}
+                          {preset.config.track}
                         </p>
                       </div>
                     )}
-                    {preset.config.MAX_CLIENTS && (
+                    {preset.config.max_clients && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           Max Clients
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.MAX_CLIENTS}
+                          {preset.config.max_clients}
                         </p>
                       </div>
                     )}
-                    {preset.config.UDP_PORT && (
+                    {preset.config.udp_port && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           UDP Port
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.UDP_PORT}
+                          {preset.config.udp_port}
                         </p>
                       </div>
                     )}
-                    {preset.config.TCP_PORT && (
+                    {preset.config.tcp_port && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           TCP Port
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.TCP_PORT}
+                          {preset.config.tcp_port}
                         </p>
                       </div>
                     )}
-                    {preset.config.HTTP_PORT && (
+                    {preset.config.http_port && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           HTTP Port
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.HTTP_PORT}
+                          {preset.config.http_port}
                         </p>
                       </div>
                     )}
-                    {preset.config.SUN_ANGLE !== undefined && (
+                    {preset.config.sun_angle !== undefined && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           Sun Angle
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.SUN_ANGLE}°
+                          {preset.config.sun_angle}°
                         </p>
                       </div>
                     )}
-                    {preset.config.FUEL_RATE && (
+                    {preset.config.fuel_rate && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           Fuel Rate
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.FUEL_RATE}%
+                          {preset.config.fuel_rate}%
                         </p>
                       </div>
                     )}
-                    {preset.config.DAMAGE_MULTIPLIER && (
+                    {preset.config.damage_multiplier && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           Damage
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.DAMAGE_MULTIPLIER}%
+                          {preset.config.damage_multiplier}%
                         </p>
                       </div>
                     )}
-                    {preset.config.TYRE_WEAR_RATE && (
+                    {preset.config.tyre_wear_rate && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           Tyre Wear
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.TYRE_WEAR_RATE}%
+                          {preset.config.tyre_wear_rate}%
                         </p>
                       </div>
                     )}
-                    {preset.config.ABS_ALLOWED !== undefined && (
+                    {preset.config.abs_allowed !== undefined && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           ABS
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.ABS_ALLOWED === 0
+                          {preset.config.abs_allowed === 0
                             ? "Disabled"
-                            : preset.config.ABS_ALLOWED === 1
+                            : preset.config.abs_allowed === 1
                               ? "Allow Factory"
                               : "Allow Forced"}
                         </p>
                       </div>
                     )}
-                    {preset.config.TC_ALLOWED !== undefined && (
+                    {preset.config.tc_allowed !== undefined && (
                       <div>
                         <p className="text-xs text-gray-600 font-semibold">
                           TC
                         </p>
                         <p className="text-gray-800 font-medium">
-                          {preset.config.TC_ALLOWED === 0
+                          {preset.config.tc_allowed === 0
                             ? "Disabled"
-                            : preset.config.TC_ALLOWED === 1
+                            : preset.config.tc_allowed === 1
                               ? "Allow Factory"
                               : "Allow Forced"}
                         </p>
@@ -1581,10 +1589,10 @@ export const PresetsManager = () => {
                   </div>
                 )}
 
-                {preset.config.CARS && preset.config.CARS.length > 0 && (
+                {preset.config.cars && preset.config.cars.length > 0 && (
                   <div className="mt-3 p-3 bg-green-50 rounded border border-green-200">
                     <p className="text-xs font-semibold text-gray-900 mb-2">
-                      Cars ({preset.config.CARS.length} entries)
+                      Cars ({preset.config.cars.length} entries)
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {(() => {
@@ -1594,7 +1602,7 @@ export const PresetsManager = () => {
                           { count: number; carName: string; skinName?: string }
                         >();
 
-                        preset.config.CARS.forEach((carString) => {
+                        preset.config.cars.forEach((carString) => {
                           const [carSlug, skinSlug] = carString.split("/");
                           const car = availableCars.find(
                             (c) => c.slug === carSlug,
@@ -1625,13 +1633,17 @@ export const PresetsManager = () => {
                               title={
                                 data.skinName
                                   ? `${data.carName} - ${data.skinName}`
-                                  : data.carName
+                                  : `${data.carName} - Random Skin`
                               }
                             >
                               <span>{data.carName}</span>
-                              {data.skinName && (
+                              {data.skinName ? (
                                 <span className="text-green-700">
                                   ({data.skinName})
+                                </span>
+                              ) : (
+                                <span className="text-green-700 italic flex items-center gap-1">
+                                  (🎲 Random)
                                 </span>
                               )}
                               {data.count > 1 && (

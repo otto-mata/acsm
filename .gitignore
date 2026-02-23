@@ -16,7 +16,7 @@ yarn-error.log*
 frontend/data
 .env*
 .vercel
-*.tsbuildinfo
+*.tsbuildinfo   
 next-env.d.ts
 frontend/public/uploads
 postgres-data/

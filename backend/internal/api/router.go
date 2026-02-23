@@ -1,6 +1,7 @@
 package api
 
 import (
+	"acsm/internal/api/handlers"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -16,9 +17,7 @@ func NewRouter() http.Handler {
 		middleware.Recoverer,
 	)
 
-	router.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
-		panic("!")
-	})
+	router.Get("/health", handlers.GetHealth)
 
 	return router
 }

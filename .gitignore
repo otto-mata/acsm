@@ -19,3 +19,4 @@ frontend/data
 *.tsbuildinfo
 next-env.d.ts
 frontend/public/uploads
+postgres-data/

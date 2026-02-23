@@ -49,14 +49,13 @@ func main() {
 	signal.Notify(c, os.Interrupt)
 	<-c
 	log.Println("Shutting down server...")
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
 
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
 		log.Fatalf("Server forced to shutdown: %v", err)
 	} else {
 		log.Println("Server gracefully shutdown")
 	}
-
 	log.Println("Exiting")
 }

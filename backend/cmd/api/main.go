@@ -2,8 +2,8 @@ package main
 
 import (
 	"acsm/internal/api"
-	"acsm/internal/core"
-	"acsm/internal/store"
+	"acsm/internal/services"
+	configservice "acsm/internal/services/config"
 	"context"
 	"fmt"
 	"log"
@@ -11,27 +11,22 @@ import (
 	"os"
 	"os/signal"
 	"time"
+
+	"github.com/samber/do"
 )
 
 func main() {
-	config, err := core.Load()
-	if err != nil {
-		panic(err)
-	}
-	log.Printf("Successfully loaded configuration\n")
 
-	pool, err := store.NewPool(context.Background(), config.Database.DSN)
-	if err != nil {
-		panic(err)
-	}
-	defer pool.Close()
-	log.Printf("Successfully created database connection pool\n")
+	injector := do.New()
+	services.InitServices(injector)
+
+	log.Printf("Successfully loaded configuration\n")
 
 	router := api.NewRouter()
 	log.Printf("Successfully created router\n")
 
 	srv := &http.Server{
-		Addr:         fmt.Sprintf("127.0.0.1:%d", config.Server.Port),
+		Addr:         fmt.Sprintf("127.0.0.1:%d", do.MustInvoke[configservice.ConfigService](injector).GetConfig().Port),
 		Handler:      router,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

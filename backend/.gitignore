@@ -1,6 +1,4 @@
 /main
 *.env
 !*example.env
-internal/store/queries/*.sql
-!internal/store/queries/dummy.sql
 *.exe

@@ -11,6 +11,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/samber/do"
 )
 
 type JWTService interface {
@@ -29,6 +30,15 @@ type AccessClaims struct {
 	UserID uuid.UUID `json:"user_id"`
 	Role   string    `json:"role"`
 	jwt.RegisteredClaims
+}
+
+func NewProvider() func(i *do.Injector) (JWTService, error) {
+	return func(i *do.Injector) (JWTService, error) {
+		return New(
+			do.MustInvoke[configservice.ConfigService](i),
+			do.MustInvoke[*store.Queries](i),
+		)
+	}
 }
 
 func New(

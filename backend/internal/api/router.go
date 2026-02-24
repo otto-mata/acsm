@@ -2,13 +2,18 @@ package api
 
 import (
 	"acsm/internal/api/handlers"
+	configservice "acsm/internal/services/config"
+	jwtservice "acsm/internal/services/jwt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-func NewRouter() http.Handler {
+func NewRouter(
+	configService configservice.ConfigService,
+	jwtService jwtservice.JWTService,
+) http.Handler {
 	router := chi.NewMux()
 	router.Use(
 		middleware.RequestID,

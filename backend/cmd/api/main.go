@@ -1,9 +1,12 @@
 package main
 
 import (
-	"acsm/internal/api"
+	authcontroller "acsm/internal/api/controllers/auth"
+	"acsm/internal/api/handlers"
+	mdlwr "acsm/internal/api/middleware"
 	"acsm/internal/services"
 	configservice "acsm/internal/services/config"
+	jwtservice "acsm/internal/services/jwt"
 	"context"
 	"fmt"
 	"log"
@@ -12,6 +15,8 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/samber/do"
 )
 
@@ -22,9 +27,13 @@ func main() {
 
 	log.Printf("Successfully loaded configuration\n")
 
-	router := api.NewRouter()
-	log.Printf("Successfully created router\n")
+	router := chi.NewRouter()
+	router.Get("/health", handlers.GetHealth)
+	router.Get("/health", handlers.GetHealth)
+	router.Route("/api", apiMux(injector))
+	authcontroller.Init(router, injector)
 
+	log.Printf("Successfully created router\n")
 	srv := &http.Server{
 		Addr:         fmt.Sprintf("127.0.0.1:%d", do.MustInvoke[configservice.ConfigService](injector).GetConfig().Port),
 		Handler:      router,
@@ -53,4 +62,26 @@ func main() {
 		log.Println("Server gracefully shutdown")
 	}
 	log.Println("Exiting")
+}
+
+func apiMux(
+	injector *do.Injector,
+) func(chi.Router) {
+	return func(r chi.Router) {
+		config := do.MustInvoke[configservice.ConfigService](injector).GetConfig()
+		jwtService := do.MustInvoke[jwtservice.JWTService](injector)
+		r.Use(
+			middleware.RequestID,
+			middleware.RealIP,
+			middleware.Logger,
+			middleware.Recoverer,
+			mdlwr.NewAuthMiddleware(
+				config,
+				jwtService,
+			),
+		)
+		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
+			w.Write([]byte("hello"))
+		})
+	}
 }

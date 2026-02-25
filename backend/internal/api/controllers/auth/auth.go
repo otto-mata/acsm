@@ -27,6 +27,7 @@ func Init(api chi.Router, injector *do.Injector) {
 	}
 	authController.Login(api)
 	authController.Register(api)
+	authController.Refresh(api)
 }
 
 func (ctrl *authController) Login(api chi.Router) {
@@ -43,13 +44,13 @@ func (ctrl *authController) Login(api chi.Router) {
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		token, err := ctrl.jwtService.GenerateAccessToken(user.ID, user.Role)
+		token, err := ctrl.jwtService.GenerateAccessToken(r.Context(), user.ID, user.Role)
 		if err != nil {
 			log.Println(err)
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		refreshToken, err := ctrl.jwtService.GenerateRefreshToken(user.ID)
+		refreshToken, err := ctrl.jwtService.GenerateRefreshToken(r.Context(), user.ID)
 		var res LoginResponse
 		res.AccessToken = token
 		http.SetCookie(w, &http.Cookie{
@@ -88,5 +89,26 @@ func (ctrl *authController) Register(api chi.Router) {
 		apiutils.AsJson(w, map[string]any{
 			"success": true,
 		}, http.StatusCreated)
+	})
+}
+
+func (ctrl *authController) Refresh(api chi.Router) {
+	api.Post("/auth/refresh", func(w http.ResponseWriter, r *http.Request) {
+
+		rtCookie, err := r.Cookie("refresh_token")
+		if err != nil {
+			apiutils.AsJson(w, map[string]any{
+				"error": err.Error(),
+			}, 400)
+		}
+
+		accessToken, err := ctrl.authService.RefreshUser(r.Context(), rtCookie.Value)
+		if err != nil {
+			apiutils.AsJson(w, map[string]any{
+				"error": err.Error(),
+			}, 403)
+			return
+		}
+		apiutils.AsJson(w, RefreshResponse{AccessToken: accessToken}, 200)
 	})
 }

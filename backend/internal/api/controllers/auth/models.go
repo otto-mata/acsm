@@ -15,3 +15,9 @@ type RegisterRequest struct {
 	Role     string `json:"role"`
 	Password string `json:"password"`
 }
+
+type RefreshRequest struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+type RefreshResponse LoginResponse

@@ -15,10 +15,10 @@ import (
 )
 
 type JWTService interface {
-	GenerateAccessToken(userID uuid.UUID, role string) (string, error)
-	GenerateRefreshToken(userID uuid.UUID) (string, error)
+	GenerateAccessToken(ctx context.Context, userID uuid.UUID, role string) (string, error)
+	GenerateRefreshToken(ctx context.Context, userID uuid.UUID) (string, error)
 	ValidateAccessToken(tokenString string) (*AccessClaims, error)
-	ValidateRefreshToken(tokenString string) error
+	ValidateRefreshToken(ctx context.Context, tokenString string) error
 }
 
 type jwtService struct {
@@ -53,7 +53,7 @@ func New(
 }
 
 // GenerateAccessToken creates a short-lived signed JWT
-func (s *jwtService) GenerateAccessToken(userID uuid.UUID, role string) (string, error) {
+func (s *jwtService) GenerateAccessToken(ctx context.Context, userID uuid.UUID, role string) (string, error) {
 	tokenID := uuid.New()
 	claims := AccessClaims{
 		UserID: userID,
@@ -71,7 +71,7 @@ func (s *jwtService) GenerateAccessToken(userID uuid.UUID, role string) (string,
 }
 
 // GenerateRefreshToken creates a long-lived signed JWT
-func (s *jwtService) GenerateRefreshToken(userID uuid.UUID) (string, error) {
+func (s *jwtService) GenerateRefreshToken(ctx context.Context, userID uuid.UUID) (string, error) {
 	claims := jwt.RegisteredClaims{
 		Subject:   userID.String(),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -88,7 +88,7 @@ func (s *jwtService) GenerateRefreshToken(userID uuid.UUID) (string, error) {
 	if err != nil {
 		return "", nil
 	}
-	storedRefresh, err := s.databaseService.CreateRefreshToken(context.Background(),
+	storedRefresh, err := s.databaseService.CreateRefreshToken(ctx,
 		store.CreateRefreshTokenParams{
 			UserID: userID,
 			ExpiresAt: pgtype.Timestamp{
@@ -129,7 +129,7 @@ func (s *jwtService) ValidateAccessToken(tokenString string) (*AccessClaims, err
 	}, nil
 }
 
-func (s *jwtService) ValidateRefreshToken(tokenString string) error {
+func (s *jwtService) ValidateRefreshToken(ctx context.Context, tokenString string) error {
 	refresh, err := jwt.Parse(tokenString, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected method: %s", t.Method.Alg())
@@ -147,7 +147,7 @@ func (s *jwtService) ValidateRefreshToken(tokenString string) error {
 	if err != nil {
 		return err
 	}
-	stored, err := s.databaseService.GetRefreshToken(context.Background(), userId)
+	stored, err := s.databaseService.GetRefreshToken(ctx, userId)
 	if err != nil {
 		return err
 	}

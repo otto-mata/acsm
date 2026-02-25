@@ -1,6 +1,7 @@
 package authservice
 
 import (
+	apiutils "acsm/internal/api/utils"
 	configservice "acsm/internal/services/config"
 	jwtservice "acsm/internal/services/jwt"
 	userservice "acsm/internal/services/user"
@@ -14,6 +15,10 @@ type AuthService interface {
 		ctx context.Context, email, password string) (userservice.User, error)
 	RegisterUser(
 		ctx context.Context, email, name, role, password string) (userservice.User, error)
+	RefreshUser(
+		ctx context.Context,
+		refreshToken string,
+	) (string, error)
 }
 
 type authService struct {
@@ -61,4 +66,18 @@ func (s *authService) RegisterUser(
 	password string,
 ) (userservice.User, error) {
 	return s.userService.RegisterNewUser(ctx, email, name, role, password)
+}
+
+func (s *authService) RefreshUser(
+	ctx context.Context,
+	refreshToken string,
+) (string, error) {
+	if err := s.jwtService.ValidateRefreshToken(ctx, refreshToken); err != nil {
+		return "", err
+	}
+	claims, err := apiutils.GetClaims(ctx)
+	if err != nil {
+		return "", err
+	}
+	return s.jwtService.GenerateAccessToken(ctx, claims.UserID, claims.Role)
 }

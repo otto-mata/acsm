@@ -1,23 +1,13 @@
 package middlewares
 
 import (
+	"acsm/internal/api/models"
 	configservice "acsm/internal/services/config"
 	jwtservice "acsm/internal/services/jwt"
 	"context"
 	"net/http"
 	"strings"
-
-	"github.com/google/uuid"
 )
-
-type MicroContextClaims struct {
-	UserID uuid.UUID `json:"user_id"`
-	Role   string    `json:"role"`
-}
-
-type contextKey string
-
-const ClaimsKey contextKey = "claims"
 
 func NewAuthMiddleware(
 	config configservice.Config,
@@ -39,7 +29,7 @@ func NewAuthMiddleware(
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), ClaimsKey, MicroContextClaims{UserID: token.UserID, Role: token.Role})
+			ctx := context.WithValue(r.Context(), models.ClaimsKey, models.MicroContextClaims{UserID: token.UserID, Role: token.Role})
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

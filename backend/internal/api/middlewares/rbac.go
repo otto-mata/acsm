@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"acsm/internal/api/models"
 	apiutils "acsm/internal/api/utils"
 	"net/http"
 )
@@ -23,7 +24,7 @@ func RequireRole(
 ) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			v, ok := r.Context().Value(ClaimsKey).(MicroContextClaims)
+			v, ok := r.Context().Value(models.ClaimsKey).(models.MicroContextClaims)
 			if !ok {
 				apiutils.AsJson(w, map[string]any{
 					"error": "invalid context in request (contact admin)",

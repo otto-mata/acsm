@@ -19,7 +19,7 @@ type authController struct {
 	config      configservice.Config
 }
 
-func Init(api *chi.Mux, injector *do.Injector) {
+func Init(api chi.Router, injector *do.Injector) {
 	authController := &authController{
 		authService: do.MustInvoke[authservice.AuthService](injector),
 		jwtService:  do.MustInvoke[jwtservice.JWTService](injector),
@@ -29,7 +29,7 @@ func Init(api *chi.Mux, injector *do.Injector) {
 	authController.Register(api)
 }
 
-func (ctrl *authController) Login(api *chi.Mux) {
+func (ctrl *authController) Login(api chi.Router) {
 	api.Post("/auth/login", func(w http.ResponseWriter, r *http.Request) {
 		var req LoginRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil ||
@@ -61,12 +61,11 @@ func (ctrl *authController) Login(api *chi.Mux) {
 			Path:     "/auth/refresh",
 			MaxAge:   ctrl.config.RefreshTokenTTLDay * 24 * 3600,
 		})
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(res)
+		apiutils.AsJson(w, res, http.StatusOK)
 	})
 }
 
-func (ctrl *authController) Register(api *chi.Mux) {
+func (ctrl *authController) Register(api chi.Router) {
 	api.Post("/auth/register", func(w http.ResponseWriter, r *http.Request) {
 		var req RegisterRequest
 
@@ -83,11 +82,11 @@ func (ctrl *authController) Register(api *chi.Mux) {
 			apiutils.AsJson(w, map[string]any{
 				"success": false,
 				"error":   err.Error(),
-			})
+			}, http.StatusInternalServerError)
 			return
 		}
 		apiutils.AsJson(w, map[string]any{
 			"success": true,
-		})
+		}, http.StatusCreated)
 	})
 }

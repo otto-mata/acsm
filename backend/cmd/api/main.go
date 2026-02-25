@@ -1,9 +1,11 @@
 package main
 
 import (
+	admincontroller "acsm/internal/api/controllers/admin"
 	authcontroller "acsm/internal/api/controllers/auth"
+	operatorcontroller "acsm/internal/api/controllers/operator"
 	"acsm/internal/api/handlers"
-	mdlwr "acsm/internal/api/middleware"
+	"acsm/internal/api/middlewares"
 	apiutils "acsm/internal/api/utils"
 	"acsm/internal/services"
 	configservice "acsm/internal/services/config"
@@ -75,18 +77,22 @@ func apiMux(
 			middleware.RealIP,
 			middleware.Logger,
 			middleware.Recoverer,
-			mdlwr.NewAuthMiddleware(
+			middlewares.NewAuthMiddleware(
 				config,
 				jwtService,
 			),
 		)
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-			v, ok := r.Context().Value(mdlwr.ClaimsKey).(mdlwr.MicroContextClaims)
+			v, ok := r.Context().Value(middlewares.ClaimsKey).(middlewares.MicroContextClaims)
 			if !ok {
 				log.Println("Context micro claims are not as expected")
-				w.Write([]byte(":("))
+				apiutils.AsJson(w, map[string]any{
+					"error": "Context micro claims are not as expected",
+				}, http.StatusInternalServerError)
 			}
-			apiutils.AsJson(w, v)
+			apiutils.AsJson(w, v, http.StatusOK)
 		})
+		r.Route("/admin", admincontroller.InitWithInjector(injector))
+		r.Route("/operator", operatorcontroller.InitWithInjector(injector))
 	}
 }

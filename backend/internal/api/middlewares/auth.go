@@ -1,4 +1,4 @@
-package middleware
+package middlewares
 
 import (
 	configservice "acsm/internal/services/config"

@@ -4,6 +4,7 @@ import (
 	admincontroller "acsm/internal/api/controllers/admin"
 	authcontroller "acsm/internal/api/controllers/auth"
 	operatorcontroller "acsm/internal/api/controllers/operator"
+	usercontroller "acsm/internal/api/controllers/user"
 	"acsm/internal/api/handlers"
 	"acsm/internal/api/middlewares"
 	"acsm/internal/api/models"
@@ -72,6 +73,7 @@ func apiMux(
 ) func(chi.Router) {
 	return func(r chi.Router) {
 		config := do.MustInvoke[configservice.ConfigService](injector).GetConfig()
+		fmt.Println(config)
 		jwtService := do.MustInvoke[jwtservice.JWTService](injector)
 		r.Use(
 			middleware.RequestID,
@@ -95,5 +97,6 @@ func apiMux(
 		})
 		r.Route("/admin", admincontroller.InitWithInjector(injector))
 		r.Route("/operator", operatorcontroller.InitWithInjector(injector))
+		r.Route("/users", usercontroller.InitWithInjector(injector))
 	}
 }

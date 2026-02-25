@@ -4,6 +4,7 @@ import (
 	apiutils "acsm/internal/api/utils"
 	authservice "acsm/internal/services/auth"
 	configservice "acsm/internal/services/config"
+	cryptoservice "acsm/internal/services/crypto"
 	jwtservice "acsm/internal/services/jwt"
 	"encoding/json"
 	"log"
@@ -25,13 +26,16 @@ func Init(api chi.Router, injector *do.Injector) {
 		jwtService:  do.MustInvoke[jwtservice.JWTService](injector),
 		config:      do.MustInvoke[configservice.ConfigService](injector).GetConfig(),
 	}
-	authController.Login(api)
-	authController.Register(api)
-	authController.Refresh(api)
+	api.Route("/auth", func(r chi.Router) {
+		authController.Login(r)
+		authController.Register(r)
+		authController.Refresh(r)
+		authController.Logout(r)
+	})
 }
 
 func (ctrl *authController) Login(api chi.Router) {
-	api.Post("/auth/login", func(w http.ResponseWriter, r *http.Request) {
+	api.Post("/login", func(w http.ResponseWriter, r *http.Request) {
 		var req LoginRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil ||
 			req.Email == "" ||
@@ -67,15 +71,21 @@ func (ctrl *authController) Login(api chi.Router) {
 }
 
 func (ctrl *authController) Register(api chi.Router) {
-	api.Post("/auth/register", func(w http.ResponseWriter, r *http.Request) {
+	api.Post("/register", func(w http.ResponseWriter, r *http.Request) {
 		var req RegisterRequest
-
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil ||
 			req.Email == "" ||
 			req.Password == "" ||
 			req.Role == "" ||
 			req.Name == "" {
 			http.Error(w, "invalid request", http.StatusBadRequest)
+			return
+		}
+		if err := cryptoservice.CheckPassword(ctrl.config.AdministrativePassword, req.AdministrativePassword); err != nil {
+			apiutils.AsJson(w, map[string]any{
+				"success": false,
+				"error":   err.Error(),
+			}, http.StatusUnauthorized)
 			return
 		}
 		_, err := ctrl.authService.RegisterUser(r.Context(), req.Email, req.Name, req.Role, req.Password)
@@ -93,7 +103,7 @@ func (ctrl *authController) Register(api chi.Router) {
 }
 
 func (ctrl *authController) Refresh(api chi.Router) {
-	api.Post("/auth/refresh", func(w http.ResponseWriter, r *http.Request) {
+	api.Post("/refresh", func(w http.ResponseWriter, r *http.Request) {
 
 		rtCookie, err := r.Cookie("refresh_token")
 		if err != nil {
@@ -110,5 +120,18 @@ func (ctrl *authController) Refresh(api chi.Router) {
 			return
 		}
 		apiutils.AsJson(w, RefreshResponse{AccessToken: accessToken}, 200)
+	})
+}
+
+func (ctrl *authController) Logout(api chi.Router) {
+	api.Post("/logout", func(w http.ResponseWriter, r *http.Request) {
+		err := ctrl.authService.Logout(r.Context())
+		if err != nil {
+			apiutils.AsJson(w, map[string]any{
+				"error": err.Error(),
+			}, 400)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	})
 }

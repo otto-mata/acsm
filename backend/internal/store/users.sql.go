@@ -57,6 +57,38 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) error {
 	return err
 }
 
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, name, email, hashed_password, role, created_at, updated_at FROM users
+`
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Email,
+			&i.HashedPassword,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, name, email, hashed_password, role, created_at, updated_at FROM users
 WHERE email = $1 LIMIT 1
@@ -133,29 +165,19 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
   set name = $2,
-  email = $3,
-  role = $4,
-  hashed_password = $5
+  role = $3
 WHERE id = $1
 RETURNING id, name, email, hashed_password, role, created_at, updated_at
 `
 
 type UpdateUserParams struct {
-	ID             uuid.UUID `json:"id"`
-	Name           string    `json:"name"`
-	Email          string    `json:"email"`
-	Role           string    `json:"role"`
-	HashedPassword string    `json:"hashed_password"`
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+	Role string    `json:"role"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, updateUser,
-		arg.ID,
-		arg.Name,
-		arg.Email,
-		arg.Role,
-		arg.HashedPassword,
-	)
+	row := q.db.QueryRow(ctx, updateUser, arg.ID, arg.Name, arg.Role)
 	var i User
 	err := row.Scan(
 		&i.ID,

@@ -3,8 +3,8 @@ package userservice
 import "github.com/google/uuid"
 
 type User struct {
-	ID    uuid.UUID
-	Name  string
-	Email string
-	Role  string
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
+	Role  string    `json:"role"`
 }

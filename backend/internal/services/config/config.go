@@ -10,13 +10,14 @@ import (
 )
 
 type Config struct {
-	Port               int    `mapstructure:"PORT"`
-	Env                string `mapstructure:"ENV"` // "development" | "production"
-	DSN                string `mapstructure:"DATABASE_URL"`
-	MaxConcurrency     int    `mapstructure:"MAX_CONCURRENCY"`
-	JWTSecret          string `mapstructure:"JWT_SECRET"`
-	AccessTokenTTLMin  int    `mapstructure:"ACCESS_TOKEN_TTL_MIN"`
-	RefreshTokenTTLDay int    `mapstructure:"REFRESH_TOKEN_TTL_DAY"`
+	Port                   int    `mapstructure:"PORT"`
+	Env                    string `mapstructure:"ENV"` // "development" | "production"
+	DSN                    string `mapstructure:"DATABASE_URL"`
+	MaxConcurrency         int    `mapstructure:"MAX_CONCURRENCY"`
+	JWTSecret              string `mapstructure:"JWT_SECRET"`
+	AccessTokenTTLMin      int    `mapstructure:"ACCESS_TOKEN_TTL_MIN"`
+	RefreshTokenTTLDay     int    `mapstructure:"REFRESH_TOKEN_TTL_DAY"`
+	AdministrativePassword string `mapstructure:"ADMIN_PASS"`
 }
 
 type ConfigService interface {

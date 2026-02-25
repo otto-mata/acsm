@@ -6,15 +6,22 @@ import (
 	databaseservice "acsm/internal/services/database"
 	jwtservice "acsm/internal/services/jwt"
 	"acsm/internal/store"
+	"acsm/internal/utils"
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/samber/do"
 )
 
 type UserService interface {
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	CheckPasswordForUserWithEmail(ctx context.Context, email, password string) (User, error)
-	RegisterNewUser(ctx context.Context, email, name, role, password string) (User, error)
+	CreateUser(ctx context.Context, email, name, role, password string) (User, error)
+	RemoveRefreshToken(ctx context.Context, userID uuid.UUID) error
+	ListUsers(ctx context.Context) ([]User, error)
+	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	UpdateUser(ctx context.Context, id uuid.UUID, name, role string) error
+	DeleteUser(ctx context.Context, id uuid.UUID) error
 }
 
 type userService struct {
@@ -51,12 +58,14 @@ func (s *userService) GetUserByEmail(ctx context.Context, email string) (User, e
 	if err != nil {
 		return User{}, err
 	}
-	return User{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  user.Role,
-	}, nil
+	return StoreToBusinessUser(user), nil
+}
+func (s *userService) GetUserByID(ctx context.Context, id uuid.UUID) (User, error) {
+	user, err := s.dbService.GetUserByID(ctx, id)
+	if err != nil {
+		return User{}, err
+	}
+	return StoreToBusinessUser(user), nil
 }
 
 func (s *userService) CheckPasswordForUserWithEmail(ctx context.Context,
@@ -71,36 +80,50 @@ func (s *userService) CheckPasswordForUserWithEmail(ctx context.Context,
 	if err != nil {
 		return User{}, err
 	}
-	return User{
-		ID:    user.ID,
-		Name:  user.Name,
-		Email: user.Email,
-		Role:  user.Role,
-	}, nil
+	return StoreToBusinessUser(user), nil
 }
 
-func (s *userService) RegisterNewUser(
+func (s *userService) CreateUser(
 	ctx context.Context,
 	email,
 	name,
 	role,
-	password string,
+	hash string,
 ) (User, error) {
-	hash, err := cryptoservice.HashPassword(password)
-	if err != nil {
-		return User{}, err
-	}
 	dbuser, err := s.dbService.CreateUser(ctx, store.CreateUserParams{
 		Name:           name,
 		Email:          email,
 		HashedPassword: hash,
 		Role:           role,
 	})
-	return User{
-		ID:    dbuser.ID,
-		Name:  dbuser.Name,
-		Email: dbuser.Email,
-		Role:  dbuser.Role,
-	}, err
+	return StoreToBusinessUser(dbuser), err
 
+}
+
+func (s *userService) RemoveRefreshToken(
+	ctx context.Context,
+	userID uuid.UUID,
+) error {
+	return s.dbService.RemoveRefreshToken(ctx, userID)
+}
+
+func (s *userService) ListUsers(ctx context.Context) ([]User, error) {
+	dbusers, err := s.dbService.GetAllUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return utils.Map(dbusers, StoreToBusinessUser), nil
+}
+
+func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, role string) error {
+	_, err := s.dbService.UpdateUser(ctx, store.UpdateUserParams{
+		ID:   id,
+		Name: name,
+		Role: role,
+	})
+	return err
+}
+
+func (s *userService) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	return s.dbService.DeleteUser(ctx, id)
 }

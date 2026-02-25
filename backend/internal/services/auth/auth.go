@@ -3,6 +3,7 @@ package authservice
 import (
 	apiutils "acsm/internal/api/utils"
 	configservice "acsm/internal/services/config"
+	cryptoservice "acsm/internal/services/crypto"
 	jwtservice "acsm/internal/services/jwt"
 	userservice "acsm/internal/services/user"
 	"context"
@@ -19,6 +20,9 @@ type AuthService interface {
 		ctx context.Context,
 		refreshToken string,
 	) (string, error)
+	Logout(
+		ctx context.Context,
+	) error
 }
 
 type authService struct {
@@ -65,7 +69,12 @@ func (s *authService) RegisterUser(
 	role,
 	password string,
 ) (userservice.User, error) {
-	return s.userService.RegisterNewUser(ctx, email, name, role, password)
+
+	hash, err := cryptoservice.HashPassword(password)
+	if err != nil {
+		return userservice.User{}, err
+	}
+	return s.userService.CreateUser(ctx, email, name, role, hash)
 }
 
 func (s *authService) RefreshUser(
@@ -80,4 +89,15 @@ func (s *authService) RefreshUser(
 		return "", err
 	}
 	return s.jwtService.GenerateAccessToken(ctx, claims.UserID, claims.Role)
+}
+
+func (s *authService) Logout(
+	ctx context.Context,
+) error {
+
+	claims, err := apiutils.GetClaims(ctx)
+	if err != nil {
+		return err
+	}
+	return s.userService.RemoveRefreshToken(ctx, claims.UserID)
 }

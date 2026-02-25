@@ -25,8 +25,9 @@ ORDER BY created_at;
 -- name: UpdateUser :one
 UPDATE users
   set name = $2,
-  email = $3,
-  role = $4,
-  hashed_password = $5
+  role = $3
 WHERE id = $1
 RETURNING *;
+
+-- name: GetAllUsers :many
+SELECT * FROM users;

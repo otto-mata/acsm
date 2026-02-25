@@ -11,10 +11,9 @@ import (
 
 type AuthService interface {
 	AuthenticateUser(
-		ctx context.Context,
-		email,
-		password string,
-	) (userservice.User, error)
+		ctx context.Context, email, password string) (userservice.User, error)
+	RegisterUser(
+		ctx context.Context, email, name, role, password string) (userservice.User, error)
 }
 
 type authService struct {

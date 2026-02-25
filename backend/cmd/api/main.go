@@ -4,6 +4,7 @@ import (
 	authcontroller "acsm/internal/api/controllers/auth"
 	"acsm/internal/api/handlers"
 	mdlwr "acsm/internal/api/middleware"
+	apiutils "acsm/internal/api/utils"
 	"acsm/internal/services"
 	configservice "acsm/internal/services/config"
 	jwtservice "acsm/internal/services/jwt"
@@ -28,7 +29,6 @@ func main() {
 	log.Printf("Successfully loaded configuration\n")
 
 	router := chi.NewRouter()
-	router.Get("/health", handlers.GetHealth)
 	router.Get("/health", handlers.GetHealth)
 	router.Route("/api", apiMux(injector))
 	authcontroller.Init(router, injector)
@@ -81,7 +81,12 @@ func apiMux(
 			),
 		)
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("hello"))
+			v, ok := r.Context().Value(mdlwr.ClaimsKey).(mdlwr.MicroContextClaims)
+			if !ok {
+				log.Println("Context micro claims are not as expected")
+				w.Write([]byte(":("))
+			}
+			apiutils.AsJson(w, v)
 		})
 	}
 }

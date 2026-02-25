@@ -10,6 +10,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type MicroContextClaims struct {
+	UserID uuid.UUID `json:"user_id"`
+	Role   string    `json:"role"`
+}
+
 type contextKey string
 
 const ClaimsKey contextKey = "claims"
@@ -34,10 +39,7 @@ func NewAuthMiddleware(
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), ClaimsKey, struct {
-				UserID uuid.UUID
-				Role   string
-			}{UserID: token.UserID, Role: token.Role})
+			ctx := context.WithValue(r.Context(), ClaimsKey, MicroContextClaims{UserID: token.UserID, Role: token.Role})
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

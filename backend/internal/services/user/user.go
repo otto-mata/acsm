@@ -4,7 +4,6 @@ import (
 	configservice "acsm/internal/services/config"
 	cryptoservice "acsm/internal/services/crypto"
 	databaseservice "acsm/internal/services/database"
-	jwtservice "acsm/internal/services/jwt"
 	"acsm/internal/store"
 	"acsm/internal/utils"
 	"context"
@@ -25,9 +24,8 @@ type UserService interface {
 }
 
 type userService struct {
-	config     configservice.Config
-	dbService  *store.Queries
-	jwtService jwtservice.JWTService
+	config    configservice.Config
+	dbService *store.Queries
 }
 
 func NewProvider() func(i *do.Injector) (UserService, error) {
@@ -35,7 +33,6 @@ func NewProvider() func(i *do.Injector) (UserService, error) {
 		return New(
 			do.MustInvoke[configservice.ConfigService](i),
 			do.MustInvoke[*store.Queries](i),
-			do.MustInvoke[jwtservice.JWTService](i),
 		)
 	}
 }
@@ -43,13 +40,11 @@ func NewProvider() func(i *do.Injector) (UserService, error) {
 func New(
 	configService configservice.ConfigService,
 	dbService databaseservice.DatabaseService,
-	jwtService jwtservice.JWTService,
 ) (UserService, error) {
 	config := configService.GetConfig()
 	return &userService{
-		config:     config,
-		dbService:  dbService,
-		jwtService: jwtService,
+		config:    config,
+		dbService: dbService,
 	}, nil
 }
 

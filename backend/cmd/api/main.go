@@ -34,8 +34,8 @@ func main() {
 
 	router := chi.NewRouter()
 	router.Get("/health", handlers.GetHealth)
-	router.Route("/api", apiMux(injector))
 	authcontroller.Init(router, injector)
+	router.Route("/api", apiMux(injector))
 
 	log.Printf("Successfully created router\n")
 	srv := &http.Server{

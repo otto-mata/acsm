@@ -33,6 +33,10 @@ func main() {
 	log.Printf("Successfully loaded configuration\n")
 
 	router := chi.NewRouter()
+	router.Use(middleware.RequestID,
+		middleware.RealIP,
+		middleware.Logger,
+		middleware.Recoverer)
 	router.Get("/health", handlers.GetHealth)
 	authcontroller.Init(router, injector)
 	router.Route("/api", apiMux(injector))
@@ -76,10 +80,7 @@ func apiMux(
 		fmt.Println(config)
 		jwtService := do.MustInvoke[jwtservice.JWTService](injector)
 		r.Use(
-			middleware.RequestID,
-			middleware.RealIP,
-			middleware.Logger,
-			middleware.Recoverer,
+
 			middlewares.NewAuthMiddleware(
 				config,
 				jwtService,

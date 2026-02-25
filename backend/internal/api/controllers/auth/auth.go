@@ -37,9 +37,7 @@ func Init(api chi.Router, injector *do.Injector) {
 func (ctrl *authController) Login(api chi.Router) {
 	api.Post("/login", func(w http.ResponseWriter, r *http.Request) {
 		var req LoginRequest
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil ||
-			req.Email == "" ||
-			req.Password == "" {
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid request", http.StatusBadRequest)
 			return
 		}

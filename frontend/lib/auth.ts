@@ -1,7 +1,9 @@
-export const isLoggedIn = async (token: string) => {
-    const response = await fetch(process.env.BACKEND_URL + '/api/users/me', {
+export const isLoggedIn = async () => {
+    const token = localStorage.getItem('access_token');
+    if (token === null) return false;
+    const response = await fetch('/api/users/me', {
         headers: {
-            Authorization: 'Bearer ' + token,
+            Authorization: `Bearer ${token}`,
         },
     });
     return response.status == 200;

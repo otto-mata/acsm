@@ -1,3 +1,4 @@
+'use client';
 import {
     Card,
     CardContent,
@@ -7,54 +8,50 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { isLoggedIn } from '@/lib/auth';
+import { Backend, IsError } from '@/lib/client';
 import { Button } from '@/src/components/ui/button';
-import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
-export default async function LoginPage() {
-    async function loginAction(formData: FormData) {
-        'use server';
-        const email = formData.get('email')?.toString();
-        const password = formData.get('password')?.toString();
-        const body = JSON.stringify({ email, password });
-        const response = await fetch(process.env.BACKEND_URL + '/auth/login', {
+export default function LoginPage() {
+    const router = useRouter();
+    const formAction = async (formData: FormData) => {
+        const email = formData.get('email')?.toString() ?? '';
+        const password = formData.get('password')?.toString() ?? '';
+        const res = await fetch('/api/auth/login', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body,
+            body: JSON.stringify({ email, password }),
         });
-        if (!response.ok) {
-            console.error('Login failed', response.status);
+        if (!res.ok) {
+            console.log(res);
             return;
         }
-        const content = await response.json();
-        (await cookies()).set({
-            name: 'access_token',
-            value: content.access_token,
-            httpOnly: true,
-            maxAge: 3600,
-        });
-        redirect('/dashboard');
-    }
-    const c = await cookies();
-    const logged = await isLoggedIn(c.get('access_token')?.value ?? '');
-    if (logged) redirect('/dashboard');
-
+        const data = await res.json();
+        localStorage.setItem('access_token', data.token);
+        router.push('/dashboard');
+    };
+    useEffect(() => {
+        (async () => {
+            if (await isLoggedIn()) router.push('/dashboard');
+        })();
+    }, [router]);
     return (
         <div className="h-screen w-screen flex">
             <Card className="w-xs lg:w-lg m-auto flex flex-col justify-around">
                 <CardTitle className="text-center">Login</CardTitle>
                 <CardContent className="flex flex-col gap-y-2">
-                    <form
-                        className="flex flex-col gap-y-2"
-                        action={loginAction}
-                    >
-                        <Input type="email" placeholder="Email" name="email" />
+                    <form className="flex flex-col gap-y-2" action={formAction}>
+                        <Input
+                            type="email"
+                            placeholder="Email"
+                            name="email"
+                            value="admin@acsm.fr"
+                        />
                         <Input
                             type="password"
                             placeholder="Password"
                             name="password"
+                            value="password12345678"
                         />
                         <Button type="submit">Connect</Button>
                     </form>

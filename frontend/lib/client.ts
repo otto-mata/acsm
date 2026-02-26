@@ -1,23 +1,32 @@
-import { Axios, AxiosError, isAxiosError } from 'axios';
-import {
-    IAuthRequest,
-    IAuthTokensPair,
-    IGenericError,
-    IUserProfile,
-} from './client.models';
+import axios, { Axios, isAxiosError } from 'axios';
+import { IAuthRequest, IGenericError } from './client.models';
 
 interface IRemoteGenericError {
     error: string;
 }
 
-interface IAccessToken {
+interface IJWT {
     token: string;
     sub: string;
+    exp: number;
+    nbf: number;
+    iat: number;
+    jti: string;
 }
 
 interface IRemoteLoginResponse {
-    access_token: string;
+    access_token: IJWT;
 }
+
+export const IsError = (obj: any): obj is IGenericError => {
+    const errobj = obj as IGenericError;
+    return (
+        errobj.httpCode !== undefined &&
+        Object.hasOwn(obj, 'httpCode') &&
+        errobj.error !== undefined &&
+        Object.hasOwn(obj, 'error')
+    );
+};
 
 export class Backend {
     private static _instance: Backend | null = null;
@@ -26,9 +35,8 @@ export class Backend {
     // Utilise la variable d'environnement ou fallback vers le proxy local
     private constructor() {
         const apiUrl = process.env.BACKEND_URL || '/api';
-        this._cl = new Axios({
-            baseURL: apiUrl,
-        });
+        console.log(apiUrl);
+        this._cl = axios.create({ baseURL: apiUrl });
     }
 
     public static getInstance(): Backend {
@@ -37,35 +45,16 @@ export class Backend {
     }
     public async Login(
         data: IAuthRequest,
-    ): Promise<IAuthTokensPair | IGenericError> {
+    ): Promise<IGenericError | IRemoteLoginResponse> {
         try {
             const res = await this._cl.post<IRemoteLoginResponse>(
                 '/auth/login',
                 data,
             );
-            const cookies = res.headers['set-cookie'];
-            if (cookies === undefined) {
-                return {
-                    httpCode: 500,
-                    error: 'No set-cookie header in response',
-                };
-            }
-            const refreshTokenCookie = cookies.find((c) =>
-                c.includes('refresh_token'),
-            );
-            if (refreshTokenCookie === undefined) {
-                return {
-                    httpCode: 500,
-                    error: 'No refresh token in response',
-                };
-            }
-
-            return {
-                access: res.data.access_token,
-                refresh,
-            };
+            return { access_token: res.data.access_token };
         } catch (e: any) {
             if (isAxiosError(e)) {
+                console.log(e.toJSON());
                 const code = e.status ?? 500;
                 const reason = e.toJSON() as IRemoteGenericError;
                 return {
@@ -75,7 +64,23 @@ export class Backend {
             } else throw e;
         }
     }
-    public async GetUser(id: string): Promise<IUserProfile | IGenericError> {
-        return this._cl.get();
+    public async GetUserByID(id: string) {
+        try {
+            const res = await this._cl.get<IRemoteLoginResponse>(
+                '/api/users',
+                data,
+            );
+            return { access_token: res.data.access_token };
+        } catch (e: any) {
+            if (isAxiosError(e)) {
+                console.log(e.toJSON());
+                const code = e.status ?? 500;
+                const reason = e.toJSON() as IRemoteGenericError;
+                return {
+                    httpCode: code,
+                    error: reason.error,
+                };
+            } else throw e;
+        }
     }
 }

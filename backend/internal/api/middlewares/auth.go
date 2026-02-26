@@ -6,7 +6,6 @@ import (
 	jwtservice "acsm/internal/services/jwt"
 	"context"
 	"net/http"
-	"strings"
 )
 
 func NewAuthMiddleware(
@@ -15,15 +14,12 @@ func NewAuthMiddleware(
 ) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeader := r.Header.Get("Authorization")
-			if !strings.HasPrefix(authHeader, "Bearer ") {
+			tokenCookie, err := r.Cookie("access_token")
+			if err != nil {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return
 			}
-
-			tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-			token, err := jwtService.ValidateAccessToken(tokenStr)
-
+			token, err := jwtService.ValidateAccessToken(tokenCookie.Value)
 			if err != nil {
 				http.Error(w, "unauthorized", http.StatusUnauthorized)
 				return

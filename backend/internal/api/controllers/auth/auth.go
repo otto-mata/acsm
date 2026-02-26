@@ -27,10 +27,27 @@ func Init(api chi.Router, injector *do.Injector) {
 		config:      do.MustInvoke[configservice.ConfigService](injector).GetConfig(),
 	}
 	api.Route("/auth", func(r chi.Router) {
+		authController.Validate(r)
 		authController.Login(r)
 		authController.Register(r)
 		authController.Refresh(r)
 		authController.Logout(r)
+	})
+}
+
+func (ctrl *authController) Validate(api chi.Router) {
+	api.Post("/validate", func(w http.ResponseWriter, r *http.Request) {
+		tokenCookie, err := r.Cookie("access_token")
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		_, err = ctrl.jwtService.ValidateAccessToken(tokenCookie.Value)
+		if err != nil {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	})
 }
 
@@ -53,10 +70,27 @@ func (ctrl *authController) Login(api chi.Router) {
 			return
 		}
 		refreshToken, err := ctrl.jwtService.GenerateRefreshToken(r.Context(), user.ID)
-		var res LoginResponse
-		res.AccessToken = token
-		res.RefreshToken = refreshToken
-		apiutils.AsJson(w, res, http.StatusOK)
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "refresh_token",
+			Value:    refreshToken.Token,
+			HttpOnly: true, // not accessible via JS
+			// Secure:   true, // HTTPS only
+			SameSite: http.SameSiteStrictMode,
+			Path:     "/auth/refresh",
+			MaxAge:   ctrl.config.RefreshTokenTTLDay * 24 * 3600,
+		})
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "access_token",
+			Value:    token.Token,
+			HttpOnly: true, // not accessible via JS
+			// Secure:   true, // HTTPS only
+			SameSite: http.SameSiteStrictMode,
+			Path:     "/",
+			MaxAge:   ctrl.config.AccessTokenTTLMin * 60,
+		})
+		apiutils.AsJson(w, user, 200)
 	})
 }
 

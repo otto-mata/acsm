@@ -7,51 +7,45 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { isLoggedIn } from '@/lib/auth';
-import { Backend, IsError } from '@/lib/client';
-import { Button } from '@/src/components/ui/button';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
+    const { isLoading, isAuthenticated, login } = useAuth();
     const router = useRouter();
+    useEffect(() => {
+        if (!isLoading && isAuthenticated) {
+            router.replace('/dashboard'); // replace() prevents going back to login
+        }
+    }, [isAuthenticated, isLoading, router]);
     const formAction = async (formData: FormData) => {
         const email = formData.get('email')?.toString() ?? '';
         const password = formData.get('password')?.toString() ?? '';
-        const res = await fetch('/api/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password }),
-        });
-        if (!res.ok) {
-            console.log(res);
+        try {
+            await login(email, password);
+        } catch (e: any) {
+            toast.error(e.message, {
+                richColors: true,
+                position: 'top-center',
+            });
             return;
         }
-        const data = await res.json();
-        localStorage.setItem('access_token', data.token);
         router.push('/dashboard');
     };
-    useEffect(() => {
-        (async () => {
-            if (await isLoggedIn()) router.push('/dashboard');
-        })();
-    }, [router]);
     return (
         <div className="h-screen w-screen flex">
             <Card className="w-xs lg:w-lg m-auto flex flex-col justify-around">
                 <CardTitle className="text-center">Login</CardTitle>
                 <CardContent className="flex flex-col gap-y-2">
                     <form className="flex flex-col gap-y-2" action={formAction}>
-                        <Input
-                            type="email"
-                            placeholder="Email"
-                            name="email"
-                            value="admin@acsm.fr"
-                        />
+                        <Input type="email" placeholder="Email" name="email" />
                         <Input
                             type="password"
                             placeholder="Password"
                             name="password"
-                            value="password12345678"
                         />
                         <Button type="submit">Connect</Button>
                     </form>

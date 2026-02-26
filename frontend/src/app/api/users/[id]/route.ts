@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest) {
+export async function GET(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> },
+) {
     const token = req.cookies.get('access_token');
     if (token === undefined)
         return NextResponse.json({ error: 'Please log in' }, { status: 401 });
-    const user = await fetch(process.env.BACKEND_URL + '/api/users/me', {
+
+    const id = (await params).id;
+    const user = await fetch(process.env.BACKEND_URL + '/api/users/' + id, {
         method: 'GET',
         credentials: 'include',
         headers: {

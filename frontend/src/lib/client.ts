@@ -1,10 +1,6 @@
 import axios, { Axios, isAxiosError } from 'axios';
 import { IAuthRequest, IGenericError } from './client.models';
 
-interface IRemoteGenericError {
-    error: string;
-}
-
 interface IJWT {
     token: string;
     sub: string;
@@ -35,7 +31,6 @@ export class Backend {
     // Utilise la variable d'environnement ou fallback vers le proxy local
     private constructor() {
         const apiUrl = process.env.BACKEND_URL || '/api';
-        console.log(apiUrl);
         this._cl = axios.create({ baseURL: apiUrl });
     }
 
@@ -54,31 +49,10 @@ export class Backend {
             return { access_token: res.data.access_token };
         } catch (e: any) {
             if (isAxiosError(e)) {
-                console.log(e.toJSON());
                 const code = e.status ?? 500;
-                const reason = e.toJSON() as IRemoteGenericError;
                 return {
                     httpCode: code,
-                    error: reason.error,
-                };
-            } else throw e;
-        }
-    }
-    public async GetUserByID(id: string) {
-        try {
-            const res = await this._cl.get<IRemoteLoginResponse>(
-                '/api/users',
-                data,
-            );
-            return { access_token: res.data.access_token };
-        } catch (e: any) {
-            if (isAxiosError(e)) {
-                console.log(e.toJSON());
-                const code = e.status ?? 500;
-                const reason = e.toJSON() as IRemoteGenericError;
-                return {
-                    httpCode: code,
-                    error: reason.error,
+                    error: e.message,
                 };
             } else throw e;
         }

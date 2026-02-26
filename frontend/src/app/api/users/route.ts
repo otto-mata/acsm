@@ -4,7 +4,7 @@ export async function GET(req: NextRequest) {
     const token = req.cookies.get('access_token');
     if (token === undefined)
         return NextResponse.json({ error: 'Please log in' }, { status: 401 });
-    const user = await fetch(process.env.BACKEND_URL + '/api/users/me', {
+    const users = await fetch(process.env.BACKEND_URL + '/api/users', {
         method: 'GET',
         credentials: 'include',
         headers: {
@@ -14,7 +14,5 @@ export async function GET(req: NextRequest) {
                 .join(';'),
         },
     });
-    if (!user.ok)
-        return NextResponse.json({ error: 'Please log in' }, { status: 401 });
-    return NextResponse.json(await user.json());
+    return NextResponse.json(await users.json());
 }

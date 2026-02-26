@@ -1,3 +1,7 @@
+'use client';
+
+import { NavigationMenu } from '@/components/ui/navigation-menu';
+
 export default function UserSpaceLayout({
     children,
 }: Readonly<{
@@ -5,7 +9,8 @@ export default function UserSpaceLayout({
 }>) {
     return (
         <>
-            coucou<div>{children}</div>
+            <NavigationMenu></NavigationMenu>
+            {children}
         </>
     );
 }

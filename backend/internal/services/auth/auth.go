@@ -19,7 +19,7 @@ type AuthService interface {
 	RefreshUser(
 		ctx context.Context,
 		refreshToken string,
-	) (string, error)
+	) (jwtservice.JWTData, error)
 	Logout(
 		ctx context.Context,
 	) error
@@ -80,13 +80,13 @@ func (s *authService) RegisterUser(
 func (s *authService) RefreshUser(
 	ctx context.Context,
 	refreshToken string,
-) (string, error) {
+) (jwtservice.JWTData, error) {
 	if err := s.jwtService.ValidateRefreshToken(ctx, refreshToken); err != nil {
-		return "", err
+		return jwtservice.JWTData{}, err
 	}
 	claims, err := apiutils.GetClaims(ctx)
 	if err != nil {
-		return "", err
+		return jwtservice.JWTData{}, err
 	}
 	return s.jwtService.GenerateAccessToken(ctx, claims.UserID, claims.Role)
 }

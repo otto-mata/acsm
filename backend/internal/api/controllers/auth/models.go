@@ -1,12 +1,15 @@
 package authcontroller
 
+import jwtservice "acsm/internal/services/jwt"
+
 type LoginRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
 type LoginResponse struct {
-	AccessToken string `json:"access_token"`
+	AccessToken  jwtservice.JWTData `json:"access_token"`
+	RefreshToken jwtservice.JWTData `json:"refresh_token"`
 }
 
 type RegisterRequest struct {

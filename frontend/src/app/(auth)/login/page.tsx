@@ -2,12 +2,16 @@ import {
     Card,
     CardContent,
     CardDescription,
+    CardFooter,
     CardTitle,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { isLoggedIn } from '@/lib/auth';
 import { Button } from '@/src/components/ui/button';
+import { cookies } from 'next/headers';
+import { redirect } from 'next/navigation';
 
-export default function LoginPage() {
+export default async function LoginPage() {
     async function loginAction(formData: FormData) {
         'use server';
         const email = formData.get('email')?.toString();
@@ -20,11 +24,23 @@ export default function LoginPage() {
             },
             body,
         });
-        if (response.ok) console.log(await response.json());
-        else {
+        if (!response.ok) {
             console.error('Login failed', response.status);
+            return;
         }
+        const content = await response.json();
+        (await cookies()).set({
+            name: 'access_token',
+            value: content.access_token,
+            httpOnly: true,
+            maxAge: 3600,
+        });
+        redirect('/dashboard');
     }
+    const c = await cookies();
+    const logged = await isLoggedIn(c.get('access_token')?.value ?? '');
+    if (logged) redirect('/dashboard');
+
     return (
         <div className="h-screen w-screen flex">
             <Card className="w-xs lg:w-lg m-auto flex flex-col justify-around">
@@ -46,6 +62,7 @@ export default function LoginPage() {
                         To create an account, contact the admin.
                     </CardDescription>
                 </CardContent>
+                <CardFooter></CardFooter>
             </Card>
         </div>
     );

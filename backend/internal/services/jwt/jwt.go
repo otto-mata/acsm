@@ -15,8 +15,8 @@ import (
 )
 
 type JWTService interface {
-	GenerateAccessToken(ctx context.Context, userID uuid.UUID, role string) (string, error)
-	GenerateRefreshToken(ctx context.Context, userID uuid.UUID) (string, error)
+	GenerateAccessToken(ctx context.Context, userID uuid.UUID, role string) (JWTData, error)
+	GenerateRefreshToken(ctx context.Context, userID uuid.UUID) (JWTData, error)
 	ValidateAccessToken(tokenString string) (*AccessClaims, error)
 	ValidateRefreshToken(ctx context.Context, tokenString string) error
 }
@@ -29,6 +29,11 @@ type jwtService struct {
 type AccessClaims struct {
 	UserID uuid.UUID `json:"user_id"`
 	Role   string    `json:"role"`
+	jwt.RegisteredClaims
+}
+
+type JWTData struct {
+	Token string `json:"token"`
 	jwt.RegisteredClaims
 }
 
@@ -53,7 +58,7 @@ func New(
 }
 
 // GenerateAccessToken creates a short-lived signed JWT
-func (s *jwtService) GenerateAccessToken(ctx context.Context, userID uuid.UUID, role string) (string, error) {
+func (s *jwtService) GenerateAccessToken(ctx context.Context, userID uuid.UUID, role string) (JWTData, error) {
 	tokenID := uuid.New()
 	claims := AccessClaims{
 		UserID: userID,
@@ -67,11 +72,18 @@ func (s *jwtService) GenerateAccessToken(ctx context.Context, userID uuid.UUID, 
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(s.config.JWTSecret))
+	strToken, err := token.SignedString([]byte(s.config.JWTSecret))
+	if err != nil {
+		return JWTData{}, nil
+	}
+	return JWTData{
+		RegisteredClaims: claims.RegisteredClaims,
+		Token:            strToken,
+	}, nil
 }
 
 // GenerateRefreshToken creates a long-lived signed JWT
-func (s *jwtService) GenerateRefreshToken(ctx context.Context, userID uuid.UUID) (string, error) {
+func (s *jwtService) GenerateRefreshToken(ctx context.Context, userID uuid.UUID) (JWTData, error) {
 	claims := jwt.RegisteredClaims{
 		Subject:   userID.String(),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -82,11 +94,11 @@ func (s *jwtService) GenerateRefreshToken(ctx context.Context, userID uuid.UUID)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	refresh, err := token.SignedString([]byte(s.config.JWTSecret))
 	if err != nil {
-		return "", err
+		return JWTData{}, err
 	}
 	hash, err := cryptoservice.HashSha256(refresh)
 	if err != nil {
-		return "", nil
+		return JWTData{}, nil
 	}
 	storedRefresh, err := s.databaseService.CreateRefreshToken(ctx,
 		store.CreateRefreshTokenParams{
@@ -100,12 +112,15 @@ func (s *jwtService) GenerateRefreshToken(ctx context.Context, userID uuid.UUID)
 		},
 	)
 	if err != nil {
-		return "", err
+		return JWTData{}, err
 	}
 	if storedRefresh.UserID != userID {
-		return "", fmt.Errorf("mismatch UserID")
+		return JWTData{}, fmt.Errorf("mismatch UserID")
 	}
-	return refresh, nil
+	return JWTData{
+		Token:            refresh,
+		RegisteredClaims: claims,
+	}, nil
 }
 
 // ValidateAccessToken parses and validates a JWT string, returns Claims or error

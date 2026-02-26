@@ -55,15 +55,7 @@ func (ctrl *authController) Login(api chi.Router) {
 		refreshToken, err := ctrl.jwtService.GenerateRefreshToken(r.Context(), user.ID)
 		var res LoginResponse
 		res.AccessToken = token
-		http.SetCookie(w, &http.Cookie{
-			Name:     "refresh_token",
-			Value:    refreshToken,
-			HttpOnly: true, // not accessible via JS
-			// Secure:   true, // HTTPS only
-			SameSite: http.SameSiteStrictMode,
-			Path:     "/auth/refresh",
-			MaxAge:   ctrl.config.RefreshTokenTTLDay * 24 * 3600,
-		})
+		res.RefreshToken = refreshToken
 		apiutils.AsJson(w, res, http.StatusOK)
 	})
 }

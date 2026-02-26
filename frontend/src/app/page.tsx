@@ -1,5 +1,5 @@
-import { Button } from '@/src/components/ui/button';
+import { redirect } from 'next/navigation';
 
 export default function Home() {
-    return <Button>ACSM</Button>;
+    redirect('/login');
 }

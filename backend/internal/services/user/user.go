@@ -83,8 +83,12 @@ func (s *userService) CreateUser(
 	email,
 	name,
 	role,
-	hash string,
+	password string,
 ) (User, error) {
+	hash, err := cryptoservice.HashPassword(password)
+	if err != nil {
+		return User{}, err
+	}
 	dbuser, err := s.dbService.CreateUser(ctx, store.CreateUserParams{
 		Name:           name,
 		Email:          email,

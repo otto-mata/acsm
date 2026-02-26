@@ -33,12 +33,39 @@ func InitWithInjector(injector *do.Injector) func(api chi.Router) {
 			config: do.MustInvoke[configservice.ConfigService](injector).GetConfig(),
 			svc:    do.MustInvoke[userservice.UserService](injector),
 		}
+		userController.GetMe(api)
 		userController.GetUsers(api)
 		userController.GetUser(api)
 		userController.PostUser(api)
 		userController.PutUser(api)
 		userController.DeleteUser(api)
 	}
+}
+
+func (ctrl *userController) GetMe(r chi.Router) {
+	r.Get("/me", func(w http.ResponseWriter, r *http.Request) {
+		claims, err := apiutils.GetClaims(r.Context())
+		if err != nil {
+			apiutils.AsJson(w, map[string]any{
+				"error": "user not logged in",
+			}, http.StatusForbidden)
+			return
+		}
+		user, err := ctrl.svc.GetUserByID(r.Context(), claims.UserID)
+		if err != nil {
+			if err == pgx.ErrNoRows {
+				apiutils.AsJson(w, map[string]any{
+					"error": "no record found",
+				}, 404)
+				return
+			}
+			apiutils.AsJson(w, map[string]any{
+				"error": err.Error(),
+			}, 200)
+			return
+		}
+		apiutils.AsJson(w, user, 200)
+	})
 }
 
 func (ctrl *userController) GetUsers(r chi.Router) {

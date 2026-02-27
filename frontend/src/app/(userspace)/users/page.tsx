@@ -1,5 +1,6 @@
 'use client';
 import { LoadScreen } from '@/components/LoadScreen';
+import { ModalDialog } from '@/components/Modal';
 import { Typography } from '@/components/Typography';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -27,6 +28,8 @@ export default function Page() {
     const { isLoading } = useAuth();
     const [users, setUsers] = useState<IUserProfile[]>([]);
     const [createModalOpen, setCreateModalOpen] = useState(false);
+    const formAction = async (formData: FormData) => {};
+    const roles = ['admin', 'operator', 'viewer'];
 
     useEffect(() => {
         const usersHook = async () => {
@@ -39,9 +42,53 @@ export default function Page() {
     return (
         <div>
             {createModalOpen ? (
-                <ModalScreen
-                    setCreateModalOpen={setCreateModalOpen}
-                ></ModalScreen>
+                <ModalDialog setCreateModalOpen={setCreateModalOpen}>
+                    <CardHeader>
+                        <Typography variant={'title'} className="text-center">
+                            Create a new user
+                        </Typography>
+                    </CardHeader>
+                    <form action={formAction} className="flex flex-col gap-6">
+                        <CardContent className="flex flex-col gap-2">
+                            <Input
+                                type="email"
+                                placeholder="Email"
+                                name="email"
+                            />
+                            <Input
+                                type="text"
+                                placeholder="Account name"
+                                name="name"
+                            />
+                            <Input
+                                type="password"
+                                placeholder="Password"
+                                name="password"
+                            />
+                            <Combobox items={roles}>
+                                <ComboboxInput placeholder="Select a role" />
+                                <ComboboxContent>
+                                    <ComboboxEmpty>
+                                        No items found.
+                                    </ComboboxEmpty>
+                                    <ComboboxList>
+                                        {(item) => (
+                                            <ComboboxItem
+                                                key={item}
+                                                value={item}
+                                            >
+                                                {item}
+                                            </ComboboxItem>
+                                        )}
+                                    </ComboboxList>
+                                </ComboboxContent>
+                            </Combobox>
+                        </CardContent>
+                        <CardFooter className="m-auto">
+                            <Button type="submit">Create</Button>
+                        </CardFooter>
+                    </form>
+                </ModalDialog>
             ) : (
                 <></>
             )}
@@ -84,82 +131,6 @@ export default function Page() {
                                 <Plus></Plus>
                             </div>
                         </CardContent>
-                    </Card>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function ModalScreen({
-    setCreateModalOpen,
-}: {
-    setCreateModalOpen: (x: boolean) => void;
-}) {
-    const formAction = async (formData: FormData) => {};
-    const roles = ['admin', 'operator', 'viewer'];
-    return (
-        <div>
-            <div className="fixed inset-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent backdrop:bg-transparent">
-                <div
-                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
-                    onClick={() => {
-                        setCreateModalOpen(false);
-                    }}
-                ></div>
-                <div className="flex min-h-full items-end justify-center p-4 text-center focus:outline-none sm:items-center sm:p-0">
-                    <Card className="relative transform overflow-hidden rounded-lg text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95">
-                        <CardHeader>
-                            <Typography
-                                variant={'title'}
-                                className="text-center"
-                            >
-                                Create a new user
-                            </Typography>
-                        </CardHeader>
-                        <form
-                            action={formAction}
-                            className="flex flex-col gap-6"
-                        >
-                            <CardContent className="flex flex-col gap-2">
-                                <Input
-                                    type="email"
-                                    placeholder="Email"
-                                    name="email"
-                                />
-                                <Input
-                                    type="text"
-                                    placeholder="Account name"
-                                    name="name"
-                                />
-                                <Input
-                                    type="password"
-                                    placeholder="Password"
-                                    name="password"
-                                />
-                                <Combobox items={roles}>
-                                    <ComboboxInput placeholder="Select a role" />
-                                    <ComboboxContent>
-                                        <ComboboxEmpty>
-                                            No items found.
-                                        </ComboboxEmpty>
-                                        <ComboboxList>
-                                            {(item) => (
-                                                <ComboboxItem
-                                                    key={item}
-                                                    value={item}
-                                                >
-                                                    {item}
-                                                </ComboboxItem>
-                                            )}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </CardContent>
-                            <CardFooter className="m-auto">
-                                <Button type="submit">Create</Button>
-                            </CardFooter>
-                        </form>
                     </Card>
                 </div>
             </div>

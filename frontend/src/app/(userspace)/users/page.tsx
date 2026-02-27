@@ -1,11 +1,16 @@
 'use client';
 import { LoadScreen } from '@/components/LoadScreen';
+import { Typography } from '@/components/Typography';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardAction, CardContent } from '@/components/ui/card';
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+} from '@/components/ui/card';
 import { useAuth } from '@/hooks/useAuth';
 import { IUserProfile } from '@/lib/client.models';
-import { BookUserIcon } from 'lucide-react';
-import Link from 'next/link';
+import { Plus } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export default function Page() {
@@ -20,19 +25,42 @@ export default function Page() {
     }, []);
     if (isLoading) return <LoadScreen />;
     return (
-        <div className="lg:max-w-1/3 flex flex-col align-middle m-auto">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3 w-3/4 m-auto">
             {users.map((user) => (
-                <Card key={user.id}>
-                    <CardContent className="flex justify-around">
-                        <Badge>{user.role}</Badge>
-                        <span>{user.name}</span>
-                        <span>{user.email}</span>
-                        <Link href={'users/' + user.id}>
-                            <BookUserIcon />
-                        </Link>
+                <div key={user.id}>
+                    <a className="flex" href={'/users/' + user.id}>
+                        <Card className="m-auto text-nowrap w-full hover:bg-accent">
+                            <CardHeader className="flex justify-between">
+                                <Badge>{user.role}</Badge>
+                                <Typography variant={'label'}>
+                                    {user.id}
+                                </Typography>
+                            </CardHeader>
+                            <CardContent className="flex flex-col justify-around">
+                                <Typography variant="title">
+                                    {user.name}
+                                </Typography>
+                                <Typography variant="subtitle">
+                                    {user.email}
+                                </Typography>
+                            </CardContent>
+                            <CardFooter></CardFooter>
+                        </Card>
+                    </a>
+                </div>
+            ))}
+            <div className="flex">
+                <Card className="m-auto text-nowrap w-full h-full hover:bg-accent hover:cursor-pointer">
+                    <CardContent className="flex flex-col justify-around h-full">
+                        <div className="m-auto flex flex-col gap-4 items-center">
+                            <Typography variant="title">
+                                Create new user
+                            </Typography>
+                            <Plus></Plus>
+                        </div>
                     </CardContent>
                 </Card>
-            ))}
+            </div>
         </div>
     );
 }

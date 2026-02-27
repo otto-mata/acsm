@@ -1,42 +1,42 @@
 'use client';
 import { LoadScreen } from '@/components/LoadScreen';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardAction, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
-import { useAuth } from '@/hooks/useAuth';
 import { IUserProfile } from '@/lib/client.models';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export default function Page({ params }: { params: Promise<{ id: string }> }) {
-    const { isLoading } = useAuth();
-    const router = useRouter();
-    const [userData, setUser] = useState<IUserProfile | null>(null);
-    const [id, setId] = useState<string>('');
+    const [user, setUser] = useState<IUserProfile | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+
     useEffect(() => {
-        const idhook = async () => {
-            const { id: sId } = await params;
-            setId(sId);
-            return true;
+        const hook = async () => {
+            const { id } = await params;
+            const userdata = await fetch('/api/users/' + id);
+            if (!userdata.ok) {
+                setError(true);
+            } else {
+                setUser(await userdata.json());
+            }
+            setLoading(false);
         };
-        const userhook = async () => {
-            const data = await fetch('/api/users/' + id);
-            if (data.ok) setUser(await data.json());
-        };
-        idhook().then(() => {
-            userhook();
-        });
-    }, []);
-    if (isLoading) return <LoadScreen />;
-    console.log(id);
+        hook();
+    }, [params, loading]);
+
+    if (loading) {
+        return <LoadScreen />;
+    }
+
     return (
         <Card>
             <CardContent className="flex justify-around">
-                {userData ? (
+                {user ? (
                     <>
-                        <Badge>{userData.role}</Badge>
-                        <span>{userData.name}</span>
-                        <span>{userData.email}</span>
+                        <Badge>{user.role}</Badge>
+                        <span>{user.name}</span>
+                        <span>{user.email}</span>
                     </>
                 ) : (
                     <Spinner />

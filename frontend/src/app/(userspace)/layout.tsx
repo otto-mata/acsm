@@ -1,6 +1,12 @@
 'use client';
 
-import { NavigationMenu } from '@/components/ui/navigation-menu';
+import {
+    NavigationMenu,
+    NavigationMenuItem,
+    NavigationMenuLink,
+    NavigationMenuList,
+} from '@/components/ui/navigation-menu';
+import Link from 'next/link';
 
 export default function UserSpaceLayout({
     children,
@@ -9,8 +15,16 @@ export default function UserSpaceLayout({
 }>) {
     return (
         <>
-            <NavigationMenu></NavigationMenu>
-            {children}
+            <NavigationMenu>
+                <NavigationMenuList>
+                    <NavigationMenuItem>
+                        <NavigationMenuLink asChild>
+                            <Link href="/users">Users</Link>
+                        </NavigationMenuLink>
+                    </NavigationMenuItem>
+                </NavigationMenuList>
+            </NavigationMenu>
+            <main className="w-screen">{children}</main>
         </>
     );
 }

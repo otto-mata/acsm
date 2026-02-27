@@ -2,20 +2,32 @@
 import { LoadScreen } from '@/components/LoadScreen';
 import { Typography } from '@/components/Typography';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
     CardFooter,
     CardHeader,
 } from '@/components/ui/card';
+import {
+    Combobox,
+    ComboboxContent,
+    ComboboxEmpty,
+    ComboboxInput,
+    ComboboxItem,
+    ComboboxList,
+} from '@/components/ui/combobox';
+import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { IUserProfile } from '@/lib/client.models';
 import { Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 
 export default function Page() {
-    const { user, isLoading } = useAuth();
+    const { isLoading } = useAuth();
     const [users, setUsers] = useState<IUserProfile[]>([]);
+    const [createModalOpen, setCreateModalOpen] = useState(false);
+
     useEffect(() => {
         const usersHook = async () => {
             const data = await fetch('/api/users');
@@ -25,41 +37,131 @@ export default function Page() {
     }, []);
     if (isLoading) return <LoadScreen />;
     return (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3 w-3/4 m-auto">
-            {users.map((user) => (
-                <div key={user.id}>
-                    <a className="flex" href={'/users/' + user.id}>
-                        <Card className="m-auto text-nowrap w-full hover:bg-accent">
-                            <CardHeader className="flex justify-between">
-                                <Badge>{user.role}</Badge>
-                                <Typography variant={'label'}>
-                                    {user.id}
-                                </Typography>
-                            </CardHeader>
-                            <CardContent className="flex flex-col justify-around">
+        <div>
+            {createModalOpen ? (
+                <ModalScreen
+                    setCreateModalOpen={setCreateModalOpen}
+                ></ModalScreen>
+            ) : (
+                <></>
+            )}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3 w-3/4 m-auto">
+                {users.map((user) => (
+                    <div key={user.id}>
+                        <a className="flex" href={'/users/' + user.id}>
+                            <Card className="m-auto text-nowrap w-full hover:bg-accent">
+                                <CardHeader className="flex justify-between">
+                                    <Badge>{user.role}</Badge>
+                                    <Typography variant={'label'}>
+                                        {user.id}
+                                    </Typography>
+                                </CardHeader>
+                                <CardContent className="flex flex-col justify-around">
+                                    <Typography variant="title">
+                                        {user.name}
+                                    </Typography>
+                                    <Typography variant="subtitle">
+                                        {user.email}
+                                    </Typography>
+                                </CardContent>
+                                <CardFooter></CardFooter>
+                            </Card>
+                        </a>
+                    </div>
+                ))}
+                <div className="flex">
+                    <Card
+                        className="m-auto text-nowrap w-full h-full hover:bg-accent hover:cursor-pointer"
+                        onClick={() => {
+                            setCreateModalOpen(true);
+                        }}
+                    >
+                        <CardContent className="flex flex-col justify-around h-full">
+                            <div className="m-auto flex flex-col gap-4 items-center">
                                 <Typography variant="title">
-                                    {user.name}
+                                    Create new user
                                 </Typography>
-                                <Typography variant="subtitle">
-                                    {user.email}
-                                </Typography>
-                            </CardContent>
-                            <CardFooter></CardFooter>
-                        </Card>
-                    </a>
+                                <Plus></Plus>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
-            ))}
-            <div className="flex">
-                <Card className="m-auto text-nowrap w-full h-full hover:bg-accent hover:cursor-pointer">
-                    <CardContent className="flex flex-col justify-around h-full">
-                        <div className="m-auto flex flex-col gap-4 items-center">
-                            <Typography variant="title">
-                                Create new user
+            </div>
+        </div>
+    );
+}
+
+function ModalScreen({
+    setCreateModalOpen,
+}: {
+    setCreateModalOpen: (x: boolean) => void;
+}) {
+    const formAction = async (formData: FormData) => {};
+    const roles = ['admin', 'operator', 'viewer'];
+    return (
+        <div>
+            <div className="fixed inset-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent backdrop:bg-transparent">
+                <div
+                    className="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"
+                    onClick={() => {
+                        setCreateModalOpen(false);
+                    }}
+                ></div>
+                <div className="flex min-h-full items-end justify-center p-4 text-center focus:outline-none sm:items-center sm:p-0">
+                    <Card className="relative transform overflow-hidden rounded-lg text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95">
+                        <CardHeader>
+                            <Typography
+                                variant={'title'}
+                                className="text-center"
+                            >
+                                Create a new user
                             </Typography>
-                            <Plus></Plus>
-                        </div>
-                    </CardContent>
-                </Card>
+                        </CardHeader>
+                        <form
+                            action={formAction}
+                            className="flex flex-col gap-6"
+                        >
+                            <CardContent className="flex flex-col gap-2">
+                                <Input
+                                    type="email"
+                                    placeholder="Email"
+                                    name="email"
+                                />
+                                <Input
+                                    type="text"
+                                    placeholder="Account name"
+                                    name="name"
+                                />
+                                <Input
+                                    type="password"
+                                    placeholder="Password"
+                                    name="password"
+                                />
+                                <Combobox items={roles}>
+                                    <ComboboxInput placeholder="Select a role" />
+                                    <ComboboxContent>
+                                        <ComboboxEmpty>
+                                            No items found.
+                                        </ComboboxEmpty>
+                                        <ComboboxList>
+                                            {(item) => (
+                                                <ComboboxItem
+                                                    key={item}
+                                                    value={item}
+                                                >
+                                                    {item}
+                                                </ComboboxItem>
+                                            )}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
+                            </CardContent>
+                            <CardFooter className="m-auto">
+                                <Button type="submit">Create</Button>
+                            </CardFooter>
+                        </form>
+                    </Card>
+                </div>
             </div>
         </div>
     );

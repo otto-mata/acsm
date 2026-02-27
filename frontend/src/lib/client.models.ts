@@ -8,11 +8,12 @@ export interface IAuthTokensPair {
     refresh: string;
 }
 
+export const Roles = ['admin', 'operator', 'viewer'];
 export interface IUserProfile {
     name: string;
     id: string;
     email: string;
-    role: string;
+    role: 'admin' | 'operator' | 'viewer';
 }
 
 export interface IGenericError {

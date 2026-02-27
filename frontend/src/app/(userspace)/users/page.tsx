@@ -22,13 +22,32 @@ import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/useAuth';
 import { IUserProfile } from '@/lib/client.models';
 import { Plus } from 'lucide-react';
-import { ReactNode, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function Page() {
     const { isLoading } = useAuth();
     const [users, setUsers] = useState<IUserProfile[]>([]);
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const formAction = async (formData: FormData) => {};
+    const formAction = async (formData: FormData) => {
+        const email = formData.get('email')?.toString();
+        const name = formData.get('name')?.toString();
+        const password = formData.get('password')?.toString();
+        const role = formData.get('role')?.toString();
+        const user = await fetch('/api/users', {
+            method: 'POST',
+            body: JSON.stringify({ email, name, password, role }),
+        });
+        if (!user.ok) {
+            let msg = 'Failed to create user';
+            if (user.status === 409) msg = 'Email address is already used';
+            toast.error(msg, {
+                richColors: true,
+                position: 'top-center',
+            });
+        }
+        setCreateModalOpen(false);
+    };
     const roles = ['admin', 'operator', 'viewer'];
 
     useEffect(() => {
@@ -42,52 +61,63 @@ export default function Page() {
     return (
         <div>
             {createModalOpen ? (
-                <ModalDialog setCreateModalOpen={setCreateModalOpen}>
-                    <CardHeader>
-                        <Typography variant={'title'} className="text-center">
-                            Create a new user
-                        </Typography>
-                    </CardHeader>
-                    <form action={formAction} className="flex flex-col gap-6">
-                        <CardContent className="flex flex-col gap-2">
-                            <Input
-                                type="email"
-                                placeholder="Email"
-                                name="email"
-                            />
-                            <Input
-                                type="text"
-                                placeholder="Account name"
-                                name="name"
-                            />
-                            <Input
-                                type="password"
-                                placeholder="Password"
-                                name="password"
-                            />
-                            <Combobox items={roles}>
-                                <ComboboxInput placeholder="Select a role" />
-                                <ComboboxContent>
-                                    <ComboboxEmpty>
-                                        No items found.
-                                    </ComboboxEmpty>
-                                    <ComboboxList>
-                                        {(item) => (
-                                            <ComboboxItem
-                                                key={item}
-                                                value={item}
-                                            >
-                                                {item}
-                                            </ComboboxItem>
-                                        )}
-                                    </ComboboxList>
-                                </ComboboxContent>
-                            </Combobox>
-                        </CardContent>
-                        <CardFooter className="m-auto">
-                            <Button type="submit">Create</Button>
-                        </CardFooter>
-                    </form>
+                <ModalDialog setModalState={setCreateModalOpen}>
+                    <Card>
+                        <CardHeader>
+                            <Typography
+                                variant={'title'}
+                                className="text-center"
+                            >
+                                Create a new user
+                            </Typography>
+                        </CardHeader>
+                        <form
+                            action={formAction}
+                            className="flex flex-col gap-6"
+                        >
+                            <CardContent className="flex flex-col gap-2">
+                                <Input
+                                    type="email"
+                                    placeholder="Email"
+                                    name="email"
+                                />
+                                <Input
+                                    type="text"
+                                    placeholder="Account name"
+                                    name="name"
+                                />
+                                <Input
+                                    type="password"
+                                    placeholder="Password"
+                                    name="password"
+                                />
+                                <Combobox items={roles}>
+                                    <ComboboxInput
+                                        placeholder="Select a role"
+                                        name="role"
+                                    />
+                                    <ComboboxContent>
+                                        <ComboboxEmpty>
+                                            No items found.
+                                        </ComboboxEmpty>
+                                        <ComboboxList>
+                                            {(item) => (
+                                                <ComboboxItem
+                                                    key={item}
+                                                    value={item}
+                                                >
+                                                    {item}
+                                                </ComboboxItem>
+                                            )}
+                                        </ComboboxList>
+                                    </ComboboxContent>
+                                </Combobox>
+                            </CardContent>
+                            <CardFooter className="m-auto">
+                                <Button type="submit">Create</Button>
+                            </CardFooter>
+                        </form>
+                    </Card>
                 </ModalDialog>
             ) : (
                 <></>

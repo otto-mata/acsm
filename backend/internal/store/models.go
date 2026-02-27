@@ -11,6 +11,21 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Job struct {
+	ID          uuid.UUID   `json:"id"`
+	Name        string      `json:"name"`
+	Description pgtype.Text `json:"description"`
+	Type        string      `json:"type"`
+	ScriptPath  string      `json:"script_path"`
+	Args        []string    `json:"args"`
+	EnvVars     []byte      `json:"env_vars"`
+	Config      []byte      `json:"config"`
+	TimeoutSecs pgtype.Int4 `json:"timeout_secs"`
+	CreatedBy   uuid.UUID   `json:"created_by"`
+	CreatedAt   time.Time   `json:"created_at"`
+	UpdatedAt   time.Time   `json:"updated_at"`
+}
+
 type RefreshToken struct {
 	ID        uuid.UUID        `json:"id"`
 	UserID    uuid.UUID        `json:"user_id"`

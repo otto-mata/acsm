@@ -11,16 +11,21 @@ import (
 )
 
 type Querier interface {
+	CreateJob(ctx context.Context, arg CreateJobParams) (Job, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteJob(ctx context.Context, id uuid.UUID) error
 	DeleteUser(ctx context.Context, id uuid.UUID) error
 	GetAllUsers(ctx context.Context) ([]User, error)
+	GetJobByID(ctx context.Context, id uuid.UUID) (Job, error)
 	GetRefreshToken(ctx context.Context, userID uuid.UUID) (RefreshToken, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id uuid.UUID) (User, error)
+	ListJobs(ctx context.Context, arg ListJobsParams) ([]Job, error)
 	ListUsers(ctx context.Context) ([]User, error)
 	RemoveRefreshToken(ctx context.Context, userID uuid.UUID) error
 	RevokeRefreshToken(ctx context.Context, userID uuid.UUID) error
+	UpdateJob(ctx context.Context, arg UpdateJobParams) (Job, error)
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 }
 

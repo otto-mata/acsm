@@ -139,7 +139,7 @@ func (ctrl *userController) PostUser(r chi.Router) {
 			}, http.StatusBadRequest)
 			return
 		}
-		apiutils.AsJson(w, user, http.StatusBadRequest)
+		apiutils.AsJson(w, user, http.StatusCreated)
 	})
 }
 

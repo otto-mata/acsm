@@ -7,10 +7,11 @@ import { cn } from '@/lib/utils';
 const typographyVariants = cva('', {
     variants: {
         variant: {
-            default: 'text-primary',
+            default: 'leading-7 [&:not(:first-child)]:mt-6',
+            code: 'bg-primary text-primary-foreground relative rounded px-[0.3rem] py-[0.2rem] font-mono',
             title: 'text-primary font-bold',
             subtitle: 'text-primary-muted font-thin',
-            label: 'text-primary-muted font-thin text-sm',
+            label: 'text-primary-muted',
         },
     },
     defaultVariants: {
@@ -29,7 +30,7 @@ function Typography({
 
     return (
         <Comp
-            data-slot="badge"
+            data-slot="text"
             data-variant={variant}
             className={cn(typographyVariants({ variant }), className)}
             {...props}

@@ -18,9 +18,6 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-    const token = req.cookies.get('access_token');
-    if (token === undefined)
-        return NextResponse.json({ error: 'Please log in' }, { status: 401 });
     const body = await req.json();
     const user = await fetch(process.env.BACKEND_URL + '/api/users', {
         method: 'POST',
@@ -33,11 +30,5 @@ export async function POST(req: NextRequest) {
         },
         body: JSON.stringify(body),
     });
-    const userData = await user.json();
-    if (!user.ok)
-        return NextResponse.json(userData, {
-            status: user.status,
-            statusText: user.statusText,
-        });
-    return NextResponse.json(userData);
+    return user;
 }

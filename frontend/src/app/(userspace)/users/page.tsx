@@ -1,169 +1,288 @@
 'use client';
 import { LoadScreen } from '@/components/LoadScreen';
 import { ModalDialog } from '@/components/Modal';
-import { Typography } from '@/components/Typography';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     Card,
     CardContent,
+    CardDescription,
     CardFooter,
     CardHeader,
+    CardTitle,
 } from '@/components/ui/card';
 import {
-    Combobox,
-    ComboboxContent,
-    ComboboxEmpty,
-    ComboboxInput,
-    ComboboxItem,
-    ComboboxList,
-} from '@/components/ui/combobox';
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    Field,
+    FieldDescription,
+    FieldError,
+    FieldGroup,
+    FieldLabel,
+} from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { UserTable } from '@/components/UserTable';
 import { useAuth } from '@/hooks/useAuth';
 import { IUserProfile } from '@/lib/client.models';
-import { Plus } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { IconEdit, IconPlus } from '@tabler/icons-react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import z from 'zod';
+
+const creationSchema = z.object({
+    email: z.email(),
+    name: z
+        .string()
+        .min(3, 'Account name must be at least 3 characters.')
+        .max(32, 'Account name must be at most 32 characters.'),
+    role: z.xor([
+        z.literal('admin'),
+        z.literal('operator'),
+        z.literal('viewer'),
+    ]),
+    password: z
+        .string()
+        .min(12, 'Password must be at least 12 characters long')
+        .refine((password) => /[A-Z]/.test(password), {
+            message: 'Password must contain an uppercase letter',
+        })
+        .refine((password) => /[a-z]/.test(password), {
+            message: 'Password must contain a lowercase letter',
+        })
+        .refine((password) => /[0-9]/.test(password), {
+            message: 'Password must contain a number',
+        })
+        .refine((password) => /[!@#$%^&*]/.test(password), {
+            message: 'Password must contain a special character',
+        }),
+});
+
+function CreateButton({
+    open,
+    setOpen,
+}: {
+    open: boolean;
+    setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
+    const form = useForm<z.infer<typeof creationSchema>>({
+        resolver: zodResolver(creationSchema),
+        defaultValues: {
+            email: '',
+            name: '',
+            role: 'viewer',
+            password: '',
+        },
+    });
+
+    const onSubmit = async (formData: z.infer<typeof creationSchema>) => {
+        const user = await fetch('/api/users', {
+            method: 'POST',
+            body: JSON.stringify(formData),
+        });
+        if (!user.ok) {
+            if (user.status === 409) {
+                form.setFocus('email');
+                form.setError('email', { message: 'Email already is use' });
+            } else
+                toast.error(user.statusText, {
+                    richColors: true,
+                    position: 'top-center',
+                });
+        } else {
+            toast.success('Successfully created new user', {
+                richColors: true,
+                position: 'top-center',
+            });
+            setOpen(false);
+        }
+    };
+    return (
+        <Dialog open={open} onOpenChange={setOpen}>
+            <form id="user-creation" onSubmit={form.handleSubmit(onSubmit)}>
+                <DialogTrigger>
+                    <Button type="button">
+                        <IconPlus />
+                        Add user
+                    </Button>
+                </DialogTrigger>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Create user</DialogTitle>
+                        <DialogDescription>
+                            Creates a new user. <br />
+                        </DialogDescription>
+                    </DialogHeader>
+                    <FieldGroup>
+                        <Controller
+                            name="email"
+                            control={form.control}
+                            render={({ field, fieldState }) => {
+                                return (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="email">
+                                            Email
+                                        </FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="email"
+                                            aria-invalid={fieldState.invalid}
+                                            placeholder="Email address"
+                                            autoComplete="off"
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError
+                                                errors={[fieldState.error]}
+                                            />
+                                        )}
+                                    </Field>
+                                );
+                            }}
+                        />
+                        <Controller
+                            name="name"
+                            control={form.control}
+                            render={({ field, fieldState }) => {
+                                return (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="name">
+                                            Account name
+                                        </FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="name"
+                                            aria-invalid={fieldState.invalid}
+                                            placeholder="Username"
+                                            autoComplete="off"
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError
+                                                errors={[fieldState.error]}
+                                            />
+                                        )}
+                                    </Field>
+                                );
+                            }}
+                        />
+                        <Controller
+                            name="password"
+                            control={form.control}
+                            render={({ field, fieldState }) => {
+                                return (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="password">
+                                            Password
+                                        </FieldLabel>
+                                        <Input
+                                            {...field}
+                                            id="password"
+                                            type="password"
+                                            aria-invalid={fieldState.invalid}
+                                            placeholder="Password"
+                                            autoComplete="off"
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError
+                                                errors={[fieldState.error]}
+                                            />
+                                        )}
+                                    </Field>
+                                );
+                            }}
+                        />
+                        <Controller
+                            name="role"
+                            control={form.control}
+                            render={({ field, fieldState }) => {
+                                return (
+                                    <Field data-invalid={fieldState.invalid}>
+                                        <FieldLabel htmlFor="role">
+                                            RBAC Account role
+                                        </FieldLabel>
+                                        <Select
+                                            name={field.name}
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                        >
+                                            <SelectTrigger
+                                                id="role"
+                                                aria-invalid={
+                                                    fieldState.invalid
+                                                }
+                                            >
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectItem value="admin">
+                                                        Administrator
+                                                    </SelectItem>
+                                                    <SelectItem value="operator">
+                                                        Operator
+                                                    </SelectItem>
+                                                    <SelectItem value="viewer">
+                                                        Viewer
+                                                    </SelectItem>
+                                                </SelectGroup>
+                                            </SelectContent>
+                                        </Select>
+                                        {fieldState.invalid && (
+                                            <FieldError
+                                                errors={[fieldState.error]}
+                                            />
+                                        )}
+                                    </Field>
+                                );
+                            }}
+                        />
+                    </FieldGroup>
+                    <DialogFooter>
+                        <DialogClose asChild>
+                            <Button variant="outline">Cancel</Button>
+                        </DialogClose>
+                        <Button type="submit" form="user-creation">
+                            Save changes
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </form>
+        </Dialog>
+    );
+}
 
 export default function Page() {
     const { isLoading } = useAuth();
     const [users, setUsers] = useState<IUserProfile[]>([]);
     const [createModalOpen, setCreateModalOpen] = useState(false);
-    const formAction = async (formData: FormData) => {
-        const email = formData.get('email')?.toString();
-        const name = formData.get('name')?.toString();
-        const password = formData.get('password')?.toString();
-        const role = formData.get('role')?.toString();
-        const user = await fetch('/api/users', {
-            method: 'POST',
-            body: JSON.stringify({ email, name, password, role }),
-        });
-        if (!user.ok) {
-            let msg = 'Failed to create user';
-            if (user.status === 409) msg = 'Email address is already used';
-            toast.error(msg, {
-                richColors: true,
-                position: 'top-center',
-            });
-        }
-        setCreateModalOpen(false);
-    };
-    const roles = ['admin', 'operator', 'viewer'];
 
     useEffect(() => {
         const usersHook = async () => {
             const data = await fetch('/api/users');
             if (data.ok) setUsers(await data.json());
         };
-        usersHook();
-    }, []);
+        if (!createModalOpen) usersHook();
+    }, [createModalOpen]);
     if (isLoading) return <LoadScreen />;
     return (
-        <div>
-            {createModalOpen ? (
-                <ModalDialog setModalState={setCreateModalOpen}>
-                    <Card>
-                        <CardHeader>
-                            <Typography
-                                variant={'title'}
-                                className="text-center"
-                            >
-                                Create a new user
-                            </Typography>
-                        </CardHeader>
-                        <form
-                            action={formAction}
-                            className="flex flex-col gap-6"
-                        >
-                            <CardContent className="flex flex-col gap-2">
-                                <Input
-                                    type="email"
-                                    placeholder="Email"
-                                    name="email"
-                                />
-                                <Input
-                                    type="text"
-                                    placeholder="Account name"
-                                    name="name"
-                                />
-                                <Input
-                                    type="password"
-                                    placeholder="Password"
-                                    name="password"
-                                />
-                                <Combobox items={roles}>
-                                    <ComboboxInput
-                                        placeholder="Select a role"
-                                        name="role"
-                                    />
-                                    <ComboboxContent>
-                                        <ComboboxEmpty>
-                                            No items found.
-                                        </ComboboxEmpty>
-                                        <ComboboxList>
-                                            {(item) => (
-                                                <ComboboxItem
-                                                    key={item}
-                                                    value={item}
-                                                >
-                                                    {item}
-                                                </ComboboxItem>
-                                            )}
-                                        </ComboboxList>
-                                    </ComboboxContent>
-                                </Combobox>
-                            </CardContent>
-                            <CardFooter className="m-auto">
-                                <Button type="submit">Create</Button>
-                            </CardFooter>
-                        </form>
-                    </Card>
-                </ModalDialog>
-            ) : (
-                <></>
-            )}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 2xl:grid-cols-3 w-3/4 m-auto">
-                {users.map((user) => (
-                    <div key={user.id}>
-                        <a className="flex" href={'/users/' + user.id}>
-                            <Card className="m-auto text-nowrap w-full hover:bg-accent">
-                                <CardHeader className="flex justify-between">
-                                    <Badge>{user.role}</Badge>
-                                    <Typography variant={'label'}>
-                                        {user.id}
-                                    </Typography>
-                                </CardHeader>
-                                <CardContent className="flex flex-col justify-around">
-                                    <Typography variant="title">
-                                        {user.name}
-                                    </Typography>
-                                    <Typography variant="subtitle">
-                                        {user.email}
-                                    </Typography>
-                                </CardContent>
-                                <CardFooter></CardFooter>
-                            </Card>
-                        </a>
-                    </div>
-                ))}
-                <div className="flex">
-                    <Card
-                        className="m-auto text-nowrap w-full h-full hover:bg-accent hover:cursor-pointer"
-                        onClick={() => {
-                            setCreateModalOpen(true);
-                        }}
-                    >
-                        <CardContent className="flex flex-col justify-around h-full">
-                            <div className="m-auto flex flex-col gap-4 items-center">
-                                <Typography variant="title">
-                                    Create new user
-                                </Typography>
-                                <Plus></Plus>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        </div>
+        <>
+            <CreateButton open={createModalOpen} setOpen={setCreateModalOpen} />
+            <UserTable users={users} />
+        </>
     );
 }

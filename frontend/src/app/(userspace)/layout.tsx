@@ -1,35 +1,33 @@
 'use client';
 
+import { AppSidebar } from '@/components/AppSidebar';
+import { LoadScreen } from '@/components/LoadScreen';
 import {
-    NavigationMenu,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-} from '@/components/ui/navigation-menu';
-import Link from 'next/link';
+    SidebarInset,
+    SidebarProvider,
+    SidebarTrigger,
+} from '@/components/ui/sidebar';
+import { TooltipProvider } from '@/components/ui/tooltip';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function UserSpaceLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+    const { user } = useAuth();
+    if (user === null) return <LoadScreen />;
     return (
-        <div className="w-screen flex flex-col gap-8">
-            <NavigationMenu className="mt-2 mx-auto py-1.5 px-4 bg-sidebar-primary text-sidebar-primary-foreground rounded-sm">
-                <NavigationMenuList>
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                            <Link href="/dashboard">Dashboard</Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <NavigationMenuLink asChild>
-                            <Link href="/users">Users</Link>
-                        </NavigationMenuLink>
-                    </NavigationMenuItem>
-                </NavigationMenuList>
-            </NavigationMenu>
-            <main className="w-full">{children}</main>
-        </div>
+        <TooltipProvider>
+            <SidebarProvider>
+                <AppSidebar />
+                <SidebarInset>
+                    <main className="w-full">
+                        <SidebarTrigger />
+                        <div className="p-8">{children}</div>
+                    </main>
+                </SidebarInset>
+            </SidebarProvider>
+        </TooltipProvider>
     );
 }

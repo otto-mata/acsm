@@ -23,7 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 const res = await fetch('/api/users/me');
                 if (res.ok) {
                     const data = await res.json();
-                    setUser(data ?? null);
+                    setUser(data.data ?? null);
                 }
             } catch (error) {
                 console.error({ error });

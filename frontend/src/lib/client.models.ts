@@ -9,6 +9,11 @@ export interface IAuthTokensPair {
 }
 
 export const Roles = ['admin', 'operator', 'viewer'];
+
+export interface IApiResponse<T> {
+    data: T;
+}
+
 export interface IUserProfile {
     name: string;
     id: string;

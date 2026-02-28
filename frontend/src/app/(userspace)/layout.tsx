@@ -1,6 +1,6 @@
 'use client';
 
-import { AppSidebar } from '@/components/AppSidebar';
+import { AppSidebar } from '@/components/sidebar/AppSidebar';
 import { LoadScreen } from '@/components/LoadScreen';
 import {
     SidebarInset,
@@ -9,6 +9,10 @@ import {
 } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { useAuth } from '@/hooks/useAuth';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+const queryClient = new QueryClient();
 
 export default function UserSpaceLayout({
     children,
@@ -18,16 +22,19 @@ export default function UserSpaceLayout({
     const { user } = useAuth();
     if (user === null) return <LoadScreen />;
     return (
-        <TooltipProvider>
-            <SidebarProvider>
-                <AppSidebar />
-                <SidebarInset>
-                    <main className="w-full">
-                        <SidebarTrigger />
-                        <div className="p-8">{children}</div>
-                    </main>
-                </SidebarInset>
-            </SidebarProvider>
-        </TooltipProvider>
+        <QueryClientProvider client={queryClient}>
+            <ReactQueryDevtools />
+            <TooltipProvider>
+                <SidebarProvider>
+                    <AppSidebar />
+                    <SidebarInset>
+                        <main className="w-full">
+                            <SidebarTrigger />
+                            <div className="p-8">{children}</div>
+                        </main>
+                    </SidebarInset>
+                </SidebarProvider>
+            </TooltipProvider>
+        </QueryClientProvider>
     );
 }

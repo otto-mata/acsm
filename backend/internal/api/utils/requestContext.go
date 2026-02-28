@@ -1,14 +1,14 @@
 package apiutils
 
 import (
-	"acsm/internal/api/models"
+	"acsm/internal/api/domain"
 	"context"
 )
 
-func GetClaims(ctx context.Context) (models.MicroContextClaims, error) {
-	v, ok := ctx.Value(models.ClaimsKey).(models.MicroContextClaims)
+func GetClaims(ctx context.Context) (domain.MicroContextClaims, error) {
+	v, ok := ctx.Value(domain.ClaimsKey).(domain.MicroContextClaims)
 	if !ok {
-		return models.MicroContextClaims{}, nil
+		return domain.MicroContextClaims{}, nil
 	}
 	return v, nil
 }

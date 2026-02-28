@@ -5,9 +5,9 @@ import (
 	authcontroller "acsm/internal/api/controllers/auth"
 	operatorcontroller "acsm/internal/api/controllers/operator"
 	usercontroller "acsm/internal/api/controllers/user"
+	"acsm/internal/api/domain"
 	"acsm/internal/api/handlers"
 	"acsm/internal/api/middlewares"
-	"acsm/internal/api/models"
 	apiutils "acsm/internal/api/utils"
 	"acsm/internal/services"
 	configservice "acsm/internal/services/config"
@@ -87,7 +87,7 @@ func apiMux(
 			),
 		)
 		r.Get("/test", func(w http.ResponseWriter, r *http.Request) {
-			v, ok := r.Context().Value(models.ClaimsKey).(models.MicroContextClaims)
+			v, ok := r.Context().Value(domain.ClaimsKey).(domain.MicroContextClaims)
 			if !ok {
 				log.Println("Context micro claims are not as expected")
 				apiutils.AsJson(w, map[string]any{

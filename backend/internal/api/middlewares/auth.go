@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"acsm/internal/api/models"
+	"acsm/internal/api/domain"
 	configservice "acsm/internal/services/config"
 	jwtservice "acsm/internal/services/jwt"
 	"context"
@@ -25,7 +25,7 @@ func NewAuthMiddleware(
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), models.ClaimsKey, models.MicroContextClaims{UserID: token.UserID, Role: token.Role})
+			ctx := context.WithValue(r.Context(), domain.ClaimsKey, domain.MicroContextClaims{UserID: token.UserID, Role: token.Role})
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

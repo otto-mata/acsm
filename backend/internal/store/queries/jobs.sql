@@ -1,8 +1,8 @@
 -- name: CreateJob :one
 INSERT INTO jobs (
-    name, description, type, script_path, args, env_vars, config, timeout_secs
+    name, description, type, script_path, args, env_vars, config, timeout_secs, created_by
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
 RETURNING *;
 
@@ -12,14 +12,16 @@ WHERE id = $1 LIMIT 1;
 
 -- name: ListJobs :many
 SELECT * FROM jobs
+WHERE (sqlc.narg('type')::text IS NULL OR type = sqlc.narg('type') )
 ORDER BY created_at DESC
-LIMIT sqlc.narg('limit')::int
-OFFSET sqlc.narg('offset')::int;
+LIMIT $1
+OFFSET $2;
 
 -- name: UpdateJob :one
 UPDATE jobs
-  set name = $2,
-  description = $3
+set
+ name = coalesce(sqlc.narg('name'), name),
+ description = coalesce(sqlc.narg('description'), description)
 WHERE id = $1
 RETURNING *;
 

@@ -1,8 +1,8 @@
 package middlewares
 
 import (
-	"acsm/internal/api/domain"
 	apiutils "acsm/internal/api/utils"
+	"acsm/internal/domain"
 	"net/http"
 )
 

@@ -28,8 +28,10 @@ func InitWithInjector(injector *do.Injector) func(chi.Router) {
 			config:      do.MustInvoke[configservice.ConfigService](injector).GetConfig(),
 			dbService:   do.MustInvoke[*store.Queries](injector),
 		}
-		api.Use(middlewares.RequireRole("admin"))
-		authController.Dummy(api)
+		api.Group(func(r chi.Router) {
+			r.Use(middlewares.RequireRole("admin"))
+			authController.Dummy(r)
+		})
 	}
 
 }

@@ -1,26 +1,17 @@
 package usercontroller
 
 import (
-	apiutils "acsm/internal/api/utils"
+	api "acsm/internal/api/utils"
+	"acsm/internal/domain"
 	configservice "acsm/internal/services/config"
 	userservice "acsm/internal/services/user"
-	"encoding/json"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/validator/v10"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/samber/do"
 )
-
-type UserPost struct {
-	Email    string `json:"email" validate:"required,email"`
-	Name     string `json:"name" validate:"required"`
-	Role     string `json:"role" validate:"oneof=admin operator viewer"`
-	Password string `json:"password" validate:"max=64,min=12"`
-}
 
 type userController struct {
 	svc    userservice.UserService
@@ -44,27 +35,21 @@ func InitWithInjector(injector *do.Injector) func(api chi.Router) {
 
 func (ctrl *userController) GetMe(r chi.Router) {
 	r.Get("/me", func(w http.ResponseWriter, r *http.Request) {
-		claims, err := apiutils.GetClaims(r.Context())
+		claims, err := api.GetClaims(r.Context())
 		if err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": "user not logged in",
-			}, http.StatusForbidden)
+			api.Error401(w)
 			return
 		}
 		user, err := ctrl.svc.GetUserByID(r.Context(), claims.UserID)
 		if err != nil {
 			if err == pgx.ErrNoRows {
-				apiutils.AsJson(w, map[string]any{
-					"error": "no record found",
-				}, 404)
+				api.Error404(w)
 				return
 			}
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, 200)
+			api.Error500(w, err.Error())
 			return
 		}
-		apiutils.AsJson(w, user, 200)
+		api.Success200(w, user)
 	})
 }
 
@@ -72,107 +57,70 @@ func (ctrl *userController) GetUsers(r chi.Router) {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		users, err := ctrl.svc.ListUsers(r.Context())
 		if err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, 500)
+			api.Error500(w, err.Error())
 			return
 		}
-		apiutils.AsJson(w, users, 200)
+		api.Success200(w, users)
 	})
 }
 
 func (ctrl *userController) GetUser(r chi.Router) {
 	r.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err := uuid.Parse(chi.URLParam(r, "id"))
+		id, err := api.ResourceIDFromRequest(r)
 		if err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, 400)
+			api.Error400(w, err.Error())
 			return
 		}
 		user, err := ctrl.svc.GetUserByID(r.Context(), id)
 		if err != nil {
 			if err == pgx.ErrNoRows {
-				apiutils.AsJson(w, map[string]any{
-					"error": "no record found",
-				}, 404)
+				api.Error404(w)
 				return
 			}
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, 200)
+			api.Error500(w, err.Error())
 			return
 		}
-		apiutils.AsJson(w, user, 200)
+		api.Success200(w, user)
 	})
 }
 
 func (ctrl *userController) PostUser(r chi.Router) {
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
-		var reqBody UserPost
-		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, http.StatusBadRequest)
-			return
-		}
-		err := validator.New().Struct(reqBody)
+		params, err := api.ParseAndValidateRequest[domain.UserPost](r)
 		if err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, http.StatusBadRequest)
+			api.Error400(w, err.Error())
 			return
 		}
-		user, err := ctrl.svc.CreateUser(r.Context(), reqBody.Email, reqBody.Name, reqBody.Role, reqBody.Password)
+		user, err := ctrl.svc.CreateUser(r.Context(), params.Email, params.Name, params.Role, params.Password)
 
 		if err != nil {
 			if pgerr, ok := err.(*pgconn.PgError); ok {
 				if pgerr.Code == "23505" {
-					apiutils.AsJson(w, map[string]any{
-						"error": "Email is already taken",
-					}, http.StatusConflict)
+					api.Error409(w, "Email is already taken")
 					return
 				}
 			}
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, http.StatusBadRequest)
+			api.Error500(w, err.Error())
 			return
 		}
-		apiutils.AsJson(w, user, http.StatusCreated)
+		api.Success201(w, user)
 	})
 }
 
 func (ctrl *userController) PutUser(r chi.Router) {
 	r.Put("/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err := uuid.Parse(chi.URLParam(r, "id"))
+		id, err := api.ResourceIDFromRequest(r)
 		if err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, 400)
+			api.Error400(w, err.Error())
 			return
 		}
-		var reqBody struct {
-			Name string `json:"name"`
-			Role string `json:"role"`
-		}
-
-		if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, http.StatusBadRequest)
-			return
-		}
-		if err := ctrl.svc.UpdateUser(r.Context(), id, reqBody.Name, reqBody.Role); err != nil {
+		params, err := api.ParseAndValidateRequest[domain.UpdateUser](r)
+		if err := ctrl.svc.UpdateUser(r.Context(), id, params.Name, params.Role); err != nil {
 			if err == pgx.ErrNoRows {
-				apiutils.AsJson(w, map[string]any{
-					"error": "no record found",
-				}, 404)
+				api.Error404(w)
 				return
 			}
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, http.StatusBadRequest)
+			api.Error500(w, err.Error())
 			return
 		}
 		w.WriteHeader(http.StatusOK)
@@ -181,23 +129,17 @@ func (ctrl *userController) PutUser(r chi.Router) {
 
 func (ctrl *userController) DeleteUser(r chi.Router) {
 	r.Delete("/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id, err := uuid.Parse(chi.URLParam(r, "id"))
+		id, err := api.ResourceIDFromRequest(r)
 		if err != nil {
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, 400)
+			api.Error400(w, err.Error())
 			return
 		}
 		if err := ctrl.svc.DeleteUser(r.Context(), id); err != nil {
 			if err == pgx.ErrNoRows {
-				apiutils.AsJson(w, map[string]any{
-					"error": "no record found",
-				}, 404)
+				api.Error404(w)
 				return
 			}
-			apiutils.AsJson(w, map[string]any{
-				"error": err.Error(),
-			}, 500)
+			api.Error500(w, err.Error())
 			return
 		}
 	})

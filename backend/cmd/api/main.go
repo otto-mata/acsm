@@ -3,12 +3,13 @@ package main
 import (
 	admincontroller "acsm/internal/api/controllers/admin"
 	authcontroller "acsm/internal/api/controllers/auth"
+	jobcontroller "acsm/internal/api/controllers/job"
 	operatorcontroller "acsm/internal/api/controllers/operator"
 	usercontroller "acsm/internal/api/controllers/user"
-	"acsm/internal/api/domain"
 	"acsm/internal/api/handlers"
 	"acsm/internal/api/middlewares"
 	apiutils "acsm/internal/api/utils"
+	"acsm/internal/domain"
 	"acsm/internal/services"
 	configservice "acsm/internal/services/config"
 	jwtservice "acsm/internal/services/jwt"
@@ -99,5 +100,6 @@ func apiMux(
 		r.Route("/admin", admincontroller.InitWithInjector(injector))
 		r.Route("/operator", operatorcontroller.InitWithInjector(injector))
 		r.Route("/users", usercontroller.InitWithInjector(injector))
+		r.Route("/jobs", jobcontroller.InitWithInjector(injector))
 	}
 }

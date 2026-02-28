@@ -14,9 +14,9 @@ import (
 
 const createJob = `-- name: CreateJob :one
 INSERT INTO jobs (
-    name, description, type, script_path, args, env_vars, config, timeout_secs
+    name, description, type, script_path, args, env_vars, config, timeout_secs, created_by
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7, $8
+    $1, $2, $3, $4, $5, $6, $7, $8, $9
 )
 RETURNING id, name, description, type, script_path, args, env_vars, config, timeout_secs, created_by, created_at, updated_at
 `
@@ -30,6 +30,7 @@ type CreateJobParams struct {
 	EnvVars     []byte      `json:"env_vars"`
 	Config      []byte      `json:"config"`
 	TimeoutSecs pgtype.Int4 `json:"timeout_secs"`
+	CreatedBy   uuid.UUID   `json:"created_by"`
 }
 
 func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, error) {
@@ -42,6 +43,7 @@ func (q *Queries) CreateJob(ctx context.Context, arg CreateJobParams) (Job, erro
 		arg.EnvVars,
 		arg.Config,
 		arg.TimeoutSecs,
+		arg.CreatedBy,
 	)
 	var i Job
 	err := row.Scan(
@@ -98,18 +100,20 @@ func (q *Queries) GetJobByID(ctx context.Context, id uuid.UUID) (Job, error) {
 
 const listJobs = `-- name: ListJobs :many
 SELECT id, name, description, type, script_path, args, env_vars, config, timeout_secs, created_by, created_at, updated_at FROM jobs
+WHERE ($3::text IS NULL OR type = $3 )
 ORDER BY created_at DESC
-LIMIT $2::int
-OFFSET $1::int
+LIMIT $1
+OFFSET $2
 `
 
 type ListJobsParams struct {
-	Offset pgtype.Int4 `json:"offset"`
-	Limit  pgtype.Int4 `json:"limit"`
+	Limit  int32       `json:"limit"`
+	Offset int32       `json:"offset"`
+	Type   pgtype.Text `json:"type"`
 }
 
 func (q *Queries) ListJobs(ctx context.Context, arg ListJobsParams) ([]Job, error) {
-	rows, err := q.db.Query(ctx, listJobs, arg.Offset, arg.Limit)
+	rows, err := q.db.Query(ctx, listJobs, arg.Limit, arg.Offset, arg.Type)
 	if err != nil {
 		return nil, err
 	}
@@ -143,15 +147,16 @@ func (q *Queries) ListJobs(ctx context.Context, arg ListJobsParams) ([]Job, erro
 
 const updateJob = `-- name: UpdateJob :one
 UPDATE jobs
-  set name = $2,
-  description = $3
+set
+ name = coalesce($2, name),
+ description = coalesce($3, description)
 WHERE id = $1
 RETURNING id, name, description, type, script_path, args, env_vars, config, timeout_secs, created_by, created_at, updated_at
 `
 
 type UpdateJobParams struct {
 	ID          uuid.UUID   `json:"id"`
-	Name        string      `json:"name"`
+	Name        pgtype.Text `json:"name"`
 	Description pgtype.Text `json:"description"`
 }
 

@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createUser = `-- name: CreateUser :one
@@ -164,16 +165,17 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
-  set name = $2,
-  role = $3
+set
+ name = coalesce($2, name),
+ role = coalesce($3, role)
 WHERE id = $1
 RETURNING id, name, email, hashed_password, role, created_at, updated_at
 `
 
 type UpdateUserParams struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-	Role string    `json:"role"`
+	ID   uuid.UUID   `json:"id"`
+	Name pgtype.Text `json:"name"`
+	Role pgtype.Text `json:"role"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {

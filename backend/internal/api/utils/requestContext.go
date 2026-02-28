@@ -1,7 +1,7 @@
-package apiutils
+package api
 
 import (
-	"acsm/internal/api/domain"
+	"acsm/internal/domain"
 	"context"
 )
 

@@ -1,7 +1,7 @@
 package middlewares
 
 import (
-	"acsm/internal/api/domain"
+	"acsm/internal/domain"
 	configservice "acsm/internal/services/config"
 	jwtservice "acsm/internal/services/jwt"
 	"context"

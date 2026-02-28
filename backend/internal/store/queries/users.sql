@@ -24,8 +24,9 @@ ORDER BY created_at;
 
 -- name: UpdateUser :one
 UPDATE users
-  set name = $2,
-  role = $3
+set
+ name = coalesce(sqlc.narg('name'), name),
+ role = coalesce(sqlc.narg('role'), role)
 WHERE id = $1
 RETURNING *;
 

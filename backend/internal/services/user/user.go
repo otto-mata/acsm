@@ -9,6 +9,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/do"
 )
 
@@ -117,8 +118,8 @@ func (s *userService) ListUsers(ctx context.Context) ([]User, error) {
 func (s *userService) UpdateUser(ctx context.Context, id uuid.UUID, name, role string) error {
 	_, err := s.dbService.UpdateUser(ctx, store.UpdateUserParams{
 		ID:   id,
-		Name: name,
-		Role: role,
+		Name: pgtype.Text{String: name, Valid: name != ""},
+		Role: pgtype.Text{String: role, Valid: role != ""},
 	})
 	return err
 }

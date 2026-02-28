@@ -1,43 +1,25 @@
 package jobservice
 
 import (
-	"acsm/internal/api/domain"
+	"acsm/internal/domain"
 	configservice "acsm/internal/services/config"
 	databaseservice "acsm/internal/services/database"
 	"acsm/internal/store"
+	"acsm/internal/utils"
 	"context"
 	"encoding/json"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/samber/do"
 )
 
-type createJobParams struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description"`
-	Type        string            `json:"type"`
-	ScriptPath  string            `json:"script_path"`
-	Args        []string          `json:"args"`
-	EnvVars     map[string]string `json:"env_vars"`
-	Config      map[string]string `json:"config"`
-	TimeoutSecs int               `json:"timeout_secs"`
-}
-
-type listJobsFilters struct {
-	Offset int `json:"offset"`
-	Limit  int `json:"limit"`
-}
-type updateJobParams struct {
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
 type JobService interface {
-	CreateJob(ctx context.Context, params createJobParams) (domain.Job, error)
+	CreateJob(ctx context.Context, creatorID uuid.UUID, params domain.CreateJobParams) (domain.Job, error)
 	GetJob(ctx context.Context, id uuid.UUID) (domain.Job, error)
-	ListJobs(ctx context.Context, filter listJobsFilters) ([]domain.Job, error)
-	UpdateJob(ctx context.Context, id uuid.UUID, params updateJobParams) (domain.Job, error)
+	ListJobs(ctx context.Context, filter domain.ListJobsFilters) ([]domain.Job, error)
+	UpdateJob(ctx context.Context, id uuid.UUID, params domain.UpdateJobParams) (domain.Job, error)
 	DeleteJob(ctx context.Context, id uuid.UUID) error
 }
 type jobService struct {
@@ -65,7 +47,7 @@ func New(
 	}, nil
 }
 
-func (s *jobService) CreateJob(ctx context.Context, params createJobParams) (domain.Job, error) {
+func (s *jobService) CreateJob(ctx context.Context, creatorID uuid.UUID, params domain.CreateJobParams) (domain.Job, error) {
 	envJson, err := json.Marshal(params.EnvVars)
 	if err != nil {
 		return domain.Job{}, err
@@ -84,6 +66,7 @@ func (s *jobService) CreateJob(ctx context.Context, params createJobParams) (dom
 		EnvVars:     envJson,
 		Config:      configJson,
 		TimeoutSecs: pgtype.Int4{Int32: int32(params.TimeoutSecs), Valid: true},
+		CreatedBy:   creatorID,
 	}
 	dbJob, err := s.dbService.CreateJob(ctx, args)
 	if err != nil {
@@ -92,14 +75,41 @@ func (s *jobService) CreateJob(ctx context.Context, params createJobParams) (dom
 	return StoreToBusiness(dbJob)
 }
 func (s *jobService) GetJob(ctx context.Context, id uuid.UUID) (domain.Job, error) {
-	return domain.Job{}, nil
+	dbJob, err := s.dbService.GetJobByID(ctx, id)
+	if err != nil {
+		return domain.Job{}, err
+	}
+	return StoreToBusiness(dbJob)
 }
-func (s *jobService) ListJobs(ctx context.Context, filter listJobsFilters) ([]domain.Job, error) {
-	return []domain.Job{}, nil
+
+func (s *jobService) ListJobs(ctx context.Context, filter domain.ListJobsFilters) ([]domain.Job, error) {
+	log.Printf("%#v", filter)
+	typeFilter := domain.JobType(filter.Type)
+
+	dbJobs, err := s.dbService.ListJobs(
+		ctx,
+		store.ListJobsParams{
+			Offset: int32(filter.Offset),
+			Limit:  int32(filter.Limit),
+			Type:   pgtype.Text{String: typeFilter.ToString(), Valid: typeFilter.IsValid()},
+		},
+	)
+	if err != nil {
+		return nil, err
+	}
+	return utils.Map(dbJobs, MustStoreToBusiness), nil
 }
-func (s *jobService) UpdateJob(ctx context.Context, id uuid.UUID, params updateJobParams) (domain.Job, error) {
-	return domain.Job{}, nil
+func (s *jobService) UpdateJob(ctx context.Context, id uuid.UUID, params domain.UpdateJobParams) (domain.Job, error) {
+	job, err := s.dbService.UpdateJob(ctx, store.UpdateJobParams{
+		ID:          id,
+		Name:        pgtype.Text{String: params.Name, Valid: params.Name != ""},
+		Description: pgtype.Text{String: params.Description, Valid: params.Description != ""},
+	})
+	if err != nil {
+		return domain.Job{}, err
+	}
+	return StoreToBusiness(job)
 }
 func (s *jobService) DeleteJob(ctx context.Context, id uuid.UUID) error {
-	return nil
+	return s.dbService.DeleteJob(ctx, id)
 }

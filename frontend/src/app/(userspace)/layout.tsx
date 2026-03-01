@@ -27,12 +27,7 @@ export default function UserSpaceLayout({
             <TooltipProvider>
                 <SidebarProvider>
                     <AppSidebar />
-                    <SidebarInset>
-                        <main className="w-full">
-                            <SidebarTrigger />
-                            <div className="p-8">{children}</div>
-                        </main>
-                    </SidebarInset>
+                    <SidebarInset>{children}</SidebarInset>
                 </SidebarProvider>
             </TooltipProvider>
         </QueryClientProvider>

@@ -14,11 +14,7 @@ function ShowJSON({ content }: { content: Record<string, any> }) {
                             {entry[0]}
                         </span>
                         :&nbsp;
-                        <input
-                            className="text-primary"
-                            value={entry[1]}
-                            readOnly
-                        />
+                        <span className="text-primary">{entry[1]}</span>
                     </p>
                 );
             })}

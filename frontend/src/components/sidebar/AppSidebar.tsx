@@ -8,32 +8,39 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { IconDashboard, IconSettings2, IconUser } from '@tabler/icons-react';
-import { Car } from 'lucide-react';
-import { NavMain } from './NavMain';
-import { NavUser } from './NavUser';
 import { useAuth } from '@/hooks/useAuth';
+import {
+    IconDashboard,
+    IconList,
+    IconSettings2,
+    IconSparkles,
+    IconUser,
+} from '@tabler/icons-react';
+import { Car } from 'lucide-react';
 import { LoadScreen } from '../LoadScreen';
+import { ItemWithOptions, NavMain } from './NavMain';
+import { NavUser } from './NavUser';
 
-const sideBarData = {
-    main: [
-        {
-            title: 'Dashboard',
-            url: '/dashboard',
-            icon: IconDashboard,
-        },
-        {
-            title: 'Users',
-            url: '/users',
-            icon: IconUser,
-        },
-        {
-            title: 'Jobs',
-            url: '/jobs',
-            icon: IconSettings2,
-        },
-    ],
-};
+const sideBarData: ItemWithOptions[] = [
+    {
+        title: 'Dashboard',
+        icon: IconDashboard,
+        options: [],
+    },
+    {
+        title: 'Users',
+        icon: IconUser,
+        options: [{ title: 'List Users', url: '/users', icon: IconList }],
+    },
+    {
+        title: 'Jobs',
+        icon: IconSettings2,
+        options: [
+            { title: 'List Jobs', url: '/jobs', icon: IconList },
+            { title: 'Create Job', url: '/jobs/new', icon: IconSparkles },
+        ],
+    },
+];
 
 export function AppSidebar() {
     const { user } = useAuth();
@@ -58,7 +65,7 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={sideBarData.main} />
+                <NavMain items={sideBarData} />
                 <SidebarGroup />
             </SidebarContent>
             <SidebarFooter>

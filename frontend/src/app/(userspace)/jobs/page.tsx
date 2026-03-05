@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { CreateJobParams, type JobType } from '@/lib/validation/jobs/create';
 import { faker } from '@faker-js/faker';
-import { IconSeedling } from '@tabler/icons-react';
+import { IconPlus, IconSeedling } from '@tabler/icons-react';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -83,7 +84,7 @@ function IntCreateButton() {
 }
 
 export default function Page() {
-    const { isLoading } = useAuth();
+    const { isLoading, user } = useAuth();
     const [open, setOpen] = useState(false);
     const jobsQuery = useQuery({
         queryKey: ['jobs'],
@@ -93,15 +94,26 @@ export default function Page() {
         },
     });
 
-    if (isLoading || jobsQuery.isPending) return <LoadScreen />;
+    if (isLoading || !user || jobsQuery.isPending) return <LoadScreen />;
     return (
         <>
             <TypographyH1>Jobs</TypographyH1>
             <div className="flex justify-between">
-                <JobCreateButton open={open} setOpen={setOpen} />
+                {user.role != 'viewer' ? (
+                    <Link href="jobs/new">
+                        <Button type="button" asChild>
+                            <span>
+                                <IconPlus />
+                                New job
+                            </span>
+                        </Button>
+                    </Link>
+                ) : (
+                    <div />
+                )}
                 <IntCreateButton></IntCreateButton>
             </div>
-            <JobTable jobs={jobsQuery.data.data}></JobTable>
+            <JobTable user={user} jobs={jobsQuery.data.data}></JobTable>
         </>
     );
 }

@@ -1,11 +1,10 @@
 'use client';
 
-import { IJobDetails } from '@/lib/client.models';
+import { IJobDetails, IUserProfile } from '@/lib/client.models';
 
-import { useRouter } from 'next/navigation';
-import { TypographyCode, TypographyP } from '../Typography';
-import { Badge } from '../ui/badge';
+import Link from 'next/link';
 import { Button } from '../ui/button';
+import { Spinner } from '../ui/spinner';
 import {
     Table,
     TableBody,
@@ -15,11 +14,14 @@ import {
     TableHeader,
     TableRow,
 } from '../ui/table';
-import { Spinner } from '../ui/spinner';
-import Link from 'next/link';
 
-export function JobTable({ jobs }: { jobs: IJobDetails[] }) {
-    const router = useRouter();
+export function JobTable({
+    jobs,
+    user,
+}: {
+    jobs: IJobDetails[];
+    user: IUserProfile;
+}) {
     const kJob = jobs.at(0);
     if (kJob == undefined) return <Spinner></Spinner>;
     const keys = ['ID', 'Name', 'Type', 'Author'];

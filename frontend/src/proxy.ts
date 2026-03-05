@@ -12,7 +12,7 @@ function getRequiredRoles(pathname: string): Role[] | null {
     // e.g. /admin/users should match before /admin
     const matchedRoute = Object.keys(routePermissions)
         .sort((a, b) => b.length - a.length)
-        .find((route) => pathname.startsWith(route));
+        .find((route) => pathname.match(route));
 
     return matchedRoute ? routePermissions[matchedRoute] : null;
 }
@@ -56,5 +56,5 @@ export async function proxy(req: NextRequest) {
 
 // 🎯 Apply middleware only to these routes
 export const config = {
-    matcher: ['/login', '/dashboard', '/users/:path*'],
+    matcher: ['/login', '/dashboard', '/users/:path*', '/jobs/:path*'],
 };

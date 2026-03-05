@@ -1,6 +1,7 @@
 'use client';
 
 import { IUserProfile } from '@/lib/client.models';
+import { redirect } from 'next/navigation';
 import { createContext, ReactNode, useEffect, useState } from 'react';
 
 interface AuthContextType {
@@ -19,17 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         const checkSession = async () => {
-            try {
-                const res = await fetch('/api/users/me');
-                if (res.ok) {
-                    const data = await res.json();
-                    setUser(data.data ?? null);
-                }
-            } catch (error) {
-                console.error({ error });
-            } finally {
-                setIsLoading(false);
+            const res = await fetch('/api/users/me');
+            if (res.ok) {
+                const data = await res.json();
+                setUser(data.data ?? null);
+            } else {
+                redirect('/login');
             }
+            setIsLoading(false);
         };
 
         checkSession();
